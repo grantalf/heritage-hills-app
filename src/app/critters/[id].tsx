@@ -4,8 +4,10 @@ import { Camera, Check, Eye, ImagePlus, Lock, PartyPopper, TriangleAlert } from 
 import { useState } from 'react';
 import { Image, Platform, View } from 'react-native';
 
-import { Emoji } from '@/components/game';
+import { CritterPic } from '@/components/game';
+import { RealPhotoCard } from '@/components/real-photo';
 import { Btn, Card, Choices, EmptyState, Notice, Screen, SectionTitle, Tag, Txt, useUI } from '@/components/ui';
+import { realPhotosUrl, scientificNames } from '@/lib/data/game-art';
 import type { Zone } from '@/lib/data/game-types';
 import { useLoad } from '@/lib/data/provider';
 import { POINTS } from '@/lib/game';
@@ -59,7 +61,12 @@ export default function CritterScreen() {
   return (
     <Screen title={tl(critter.name)} subtitle={t(`critters.group.${critter.group}`)}>
       <View style={{ alignItems: 'center' }}>
-        <Emoji size={96}>{critter.emoji}</Emoji>
+        <CritterPic id={critter.id} emoji={critter.emoji} size={170} />
+        {scientificNames[critter.id] ? (
+          <Txt variant="small" tone="secondary" style={{ fontStyle: 'italic' }}>
+            {scientificNames[critter.id]}
+          </Txt>
+        ) : null}
       </View>
       <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 6 }}>
         <Tag label={t(`critters.rarity.${critter.rarity}`)} />
@@ -73,6 +80,8 @@ export default function CritterScreen() {
         <Txt variant="label">{t('critters.whereToLook')}</Txt>
         <Txt>{tl(critter.look)}</Txt>
       </Card>
+
+      <RealPhotoCard name={tl(critter.name)} scientificName={scientificNames[critter.id]} moreUrl={realPhotosUrl(critter.id)} />
 
       {critter.caution ? <Notice tone="urgent" icon={TriangleAlert} title={t('critters.cautionTitle')} body={tl(critter.caution)} /> : null}
 

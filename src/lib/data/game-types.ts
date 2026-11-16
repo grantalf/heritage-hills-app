@@ -1,3 +1,5 @@
+import type { ArtSpec } from '@/components/critter-art';
+
 import type { L } from './types';
 
 export type CritterGroup = 'mammal' | 'bird' | 'reptile' | 'amphibian' | 'insect' | 'other';
@@ -46,21 +48,9 @@ export type Pet = {
   /** A general hint, never an address. */
   where: L;
   stories: L[];
+  /** The pet's cartoon character, built from traits its family picked. */
+  art?: ArtSpec;
   mine: boolean;
-  sample: boolean;
-};
-
-export type MysteryOption = { id: string; emoji: string; label: L };
-export type Mystery = {
-  id: string;
-  kind: 'wild' | 'pet';
-  title: L;
-  intro: L;
-  clues: [L, L, L];
-  options: MysteryOption[];
-  answerId: string;
-  reveal: L;
-  action: L;
   sample: boolean;
 };
 

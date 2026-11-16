@@ -2,7 +2,7 @@ import { router } from 'expo-router';
 import { useState } from 'react';
 import { Pressable, View } from 'react-native';
 
-import { Emoji } from '@/components/game';
+import { CritterPic } from '@/components/game';
 import { Choices, Screen, Txt, useUI } from '@/components/ui';
 import type { CritterGroup } from '@/lib/data/game-types';
 import { useLoad } from '@/lib/data/provider';
@@ -42,7 +42,7 @@ export default function GuideScreen() {
               style={({ pressed }) => ({
                 flexBasis: '30%',
                 flexGrow: 1,
-                minHeight: 124,
+                minHeight: 150,
                 alignItems: 'center',
                 justifyContent: 'center',
                 gap: 4,
@@ -52,9 +52,7 @@ export default function GuideScreen() {
                 borderColor: has ? c.primary : 'transparent',
                 backgroundColor: pressed ? c.surfaceStrong : has ? c.primarySoft : c.surface,
               })}>
-              <Emoji size={40} dim={!has}>
-                {critter.emoji}
-              </Emoji>
+              <CritterPic id={critter.id} emoji={critter.emoji} size={72} dim={!has} />
               <Txt variant="label" style={{ textAlign: 'center' }}>
                 {tl(critter.name)}
               </Txt>

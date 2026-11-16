@@ -3,7 +3,7 @@ import { Check, Hand, Heart, Send, Trash2 } from 'lucide-react-native';
 import { useState } from 'react';
 import { View } from 'react-native';
 
-import { Emoji } from '@/components/game';
+import { CritterPic } from '@/components/game';
 import { Btn, Card, EmptyState, Field, Notice, SampleTag, Screen, SectionTitle, Tag, Txt } from '@/components/ui';
 import { useLoad } from '@/lib/data/provider';
 import { POINTS } from '@/lib/game';
@@ -27,7 +27,7 @@ export default function PetScreen() {
   return (
     <Screen title={pet.name} subtitle={tl(pet.about)}>
       <View style={{ alignItems: 'center' }}>
-        <Emoji size={96}>{pet.emoji}</Emoji>
+        <CritterPic id={pet.id} art={pet.art} emoji={pet.emoji} size={150} />
       </View>
       <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 6 }}>
         <Tag label={t(`critters.petKind.${pet.kind}`)} />

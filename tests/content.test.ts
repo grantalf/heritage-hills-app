@@ -61,7 +61,7 @@ test('every piece of content has English and Spanish', () => {
     docs: content.associationDocs,
     critters: game.critters,
     pets: game.samplePets,
-    mysteries: game.mysteries,
+    cases: game.cases,
     bingo: game.bingoCards,
   };
   const found: { path: string; text: L }[] = [];

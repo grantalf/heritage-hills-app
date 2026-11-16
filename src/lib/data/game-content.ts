@@ -4,13 +4,15 @@
  * The field guide lists animals commonly reported in Central Texas neighborhoods.
  * It is a DRAFT: a local naturalist should confirm each entry for Heritage Hills
  * before launch. "Rarity" is a guess until real neighborhood sightings replace it.
- * Emoji are placeholder pictures. Several are only stand-ins (there is no emoji
- * for an opossum, an armadillo or a dragonfly). Real drawings or photos replace them.
+ * Each animal has an original cartoon character (see game-art.ts). Emoji are the
+ * fallback and are used in small labels.
  *
- * Pets and mysteries here are invented samples. Real pet pages are created only
+ * Pets and pet cases here are invented samples. Real pet pages are created only
  * by a pet's own family.
  */
-import type { BingoCard, Critter, Mystery, Pet } from './game-types';
+import type { DetectiveCase } from '../cases';
+import type { Habit } from '../patterns';
+import type { BingoCard, Critter, Pet } from './game-types';
 
 export const critters: Critter[] = [
   // Mammals
@@ -31,7 +33,7 @@ export const critters: Critter[] = [
     name: { en: 'Nine-banded armadillo', es: 'Armadillo de nueve bandas' },
     fact: { en: 'A mother almost always has four identical babies.', es: 'Una madre casi siempre tiene cuatro crías idénticas.' },
     look: { en: 'At dusk, digging small cone-shaped holes for insects.', es: 'Al atardecer, haciendo hoyitos en forma de cono para buscar insectos.' },
-    caution: { en: 'Look, do not touch.', es: 'Mire, no toque.' } },
+    caution: { en: 'Watch from a few steps away. Never pick one up.', es: 'Mírelo desde unos pasos de distancia. Nunca lo levante.' } },
   { id: 'deer', group: 'mammal', emoji: '🦌', rarity: 'sometimes',
     name: { en: 'White-tailed deer', es: 'Venado cola blanca' },
     fact: { en: 'It lifts its white tail like a flag when it is alarmed.', es: 'Levanta su cola blanca como una bandera cuando se asusta.' },
@@ -198,7 +200,7 @@ export const critters: Critter[] = [
     name: { en: 'Yellow garden spider', es: 'Araña de jardín amarilla' },
     fact: { en: 'It weaves a zigzag down the middle of its web.', es: 'Teje un zigzag en el centro de su telaraña.' },
     look: { en: 'Big webs in gardens in late summer and fall.', es: 'Telarañas grandes en jardines a fines de verano y en otoño.' },
-    caution: { en: 'Look, do not touch.', es: 'Mire, no toque.' } },
+    caution: { en: 'It is shy and stays in its web. Leave the web alone.', es: 'Es tímida y se queda en su telaraña. No toque la telaraña.' } },
   { id: 'jumpingspider', group: 'other', emoji: '🕷️', rarity: 'common',
     name: { en: 'Jumping spider', es: 'Araña saltarina' },
     fact: { en: 'It has big front eyes and pounces on its food instead of using a web.', es: 'Tiene ojos grandes al frente y salta sobre su comida en lugar de usar telaraña.' },
@@ -207,7 +209,7 @@ export const critters: Critter[] = [
     name: { en: 'Texas brown tarantula', es: 'Tarántula café de Texas' },
     fact: { en: 'Calm and slow. Males wander in summer looking for a mate.', es: 'Tranquila y lenta. Los machos caminan en verano buscando pareja.' },
     look: { en: 'On warm evenings crossing paths and yards.', es: 'En tardes cálidas cruzando caminos y jardines.' },
-    caution: { en: 'Look, do not touch.', es: 'Mire, no toque.' } },
+    caution: { en: 'It is calm, but do not pick it up. Let it walk on by.', es: 'Es tranquila, pero no la levante. Déjela seguir su camino.' } },
   { id: 'scorpion', group: 'other', emoji: '🦂', rarity: 'sometimes', night: true,
     name: { en: 'Striped bark scorpion', es: 'Alacrán rayado de corteza' },
     fact: { en: 'It glows under ultraviolet light.', es: 'Brilla bajo la luz ultravioleta.' },
@@ -267,76 +269,105 @@ export const samplePets: Pet[] = [
     stories: [] },
 ];
 
-export const mysteries: Mystery[] = [
-  { id: 'm-holes', kind: 'wild', sample: false,
+export const cases: DetectiveCase[] = [
+  { id: 'case-holes', kind: 'wild', sample: false, culpritId: 'armadillo', hours: 24,
     title: { en: 'The case of the cone-shaped holes', es: 'El caso de los hoyitos en forma de cono' },
-    intro: { en: 'Small holes appeared in the lawn overnight. Who made them?', es: 'Aparecieron hoyitos en el pasto durante la noche. ¿Quién los hizo?' },
-    clues: [
-      { en: 'The visitor came after sunset.', es: 'El visitante llegó después del atardecer.' },
-      { en: 'It was sniffing the ground for insects.', es: 'Olfateaba el suelo buscando insectos.' },
-      { en: 'It wears armor made of bony plates.', es: 'Lleva una armadura de placas de hueso.' },
+    briefing: { en: 'Detective, small holes appeared in a lawn overnight. Follow the trail, question the witnesses and name the digger before time runs out.', es: 'Detective, aparecieron hoyitos en un jardín durante la noche. Siga el rastro, pregunte a los testigos y nombre al excavador antes de que se acabe el tiempo.' },
+    stops: [
+      { zone: 'yard', nextOptions: ['garden', 'park', 'sky'], witnesses: [
+        { emoji: '🐕', who: { en: 'Pepper the dog', es: 'Pepper, la perrita' }, clue: { en: 'I barked at it after dark. It did not run. It shuffled off toward the big trees in the park.', es: 'Le ladré después de oscurecer. No corrió. Se fue arrastrando los pies hacia los árboles grandes del parque.' } },
+        { emoji: '🕳️', who: { en: 'The holes', es: 'Los hoyitos' }, clue: { en: 'Each hole is a small cone. Just right for a long snout hunting grubs at night.', es: 'Cada hoyito es un cono pequeño. Perfecto para un hocico largo que busca larvas de noche.' } },
+        { emoji: '🎶', who: { en: 'A mockingbird', es: 'Un cenzontle' }, clue: { en: 'I was singing at midnight when it passed below. It was about the size of a cat.', es: 'Yo cantaba a medianoche cuando pasó por abajo. Era más o menos del tamaño de un gato.' } },
+      ] },
+      { zone: 'park', nextOptions: ['street', 'creek', 'yard'], witnesses: [
+        { emoji: '🦉', who: { en: 'A screech-owl', es: 'Un tecolote' }, clue: { en: 'It is no bird. It has a little hair and feeds its babies milk.', es: 'No es un ave. Tiene un poco de pelo y da leche a sus crías.' } },
+        { emoji: '👣', who: { en: 'Tracks in the dirt', es: 'Huellas en la tierra' }, clue: { en: 'Long claws, and a line where a tail dragged. The tracks go downhill to the water.', es: 'Garras largas, y una línea donde arrastró la cola. Las huellas bajan hacia el agua.' } },
+        { emoji: '🐿️', who: { en: 'A fox squirrel', es: 'Una ardilla zorro' }, clue: { en: 'It dug by my oak, then trotted to the creek for a drink.', es: 'Escarbó junto a mi roble y luego trotó al arroyo a tomar agua.' } },
+      ] },
+      { zone: 'creek', witnesses: [
+        { emoji: '🐸', who: { en: 'A leopard frog', es: 'Una rana leopardo' }, clue: { en: 'It wears armor made of bony plates, like a little knight.', es: 'Lleva una armadura de placas de hueso, como un pequeño caballero.' } },
+        { emoji: '🦝', who: { en: 'A raccoon', es: 'Un mapache' }, clue: { en: 'Do not look at me. I use my hands. That one digs with its nose and claws.', es: 'A mí no me mire. Yo uso las manos. Ese escarba con la nariz y las garras.' } },
+        { emoji: '🪵', who: { en: 'A burrow under a root', es: 'Una madriguera bajo una raíz' }, clue: { en: 'Something sleeps in here all day and leaves at dusk.', es: 'Algo duerme aquí todo el día y sale al atardecer.' } },
+      ] },
     ],
-    options: [
-      { id: 'armadillo', emoji: '🦔', label: { en: 'Armadillo', es: 'Armadillo' } },
-      { id: 'squirrel', emoji: '🐿️', label: { en: 'Fox squirrel', es: 'Ardilla zorro' } },
-      { id: 'cottontail', emoji: '🐇', label: { en: 'Cottontail', es: 'Conejo' } },
-      { id: 'grackle', emoji: '🐦‍⬛', label: { en: 'Grackle', es: 'Zanate' } },
-    ],
-    answerId: 'armadillo',
-    reveal: { en: 'It was the armadillo. It digs little cone-shaped holes to reach grubs and beetles.', es: 'Fue el armadillo. Hace hoyitos en forma de cono para alcanzar larvas y escarabajos.' },
+    reveal: { en: 'It was the nine-banded armadillo. It digs little cone-shaped holes to reach grubs and beetles.', es: 'Fue el armadillo de nueve bandas. Hace hoyitos en forma de cono para alcanzar larvas y escarabajos.' },
     action: { en: 'The holes are harmless. Press the soil back with your foot.', es: 'Los hoyitos no hacen daño. Aplaste la tierra con el pie.' } },
-  { id: 'm-porch', kind: 'wild', sample: false,
+  { id: 'case-porch', kind: 'wild', sample: false, culpritId: 'gecko', hours: 24,
     title: { en: 'The case of the porch-light hunter', es: 'El caso del cazador de la luz del porche' },
-    intro: { en: 'Something small waits on the wall by the light every night. Who is it?', es: 'Algo pequeño espera en la pared junto a la luz cada noche. ¿Quién es?' },
-    clues: [
-      { en: 'It only comes out after dark.', es: 'Solo sale después de oscurecer.' },
-      { en: 'It walks straight up walls and across the ceiling.', es: 'Camina por las paredes y por el techo.' },
-      { en: 'It is pale, with bumpy skin, and it eats moths.', es: 'Es pálido, de piel rugosa, y come polillas.' },
+    briefing: { en: 'Detective, moths keep vanishing near a porch light. Find out who is waiting there every night.', es: 'Detective, las polillas siguen desapareciendo cerca de una luz del porche. Descubra quién espera ahí cada noche.' },
+    stops: [
+      { zone: 'yard', nextOptions: ['creek', 'street', 'park'], witnesses: [
+        { emoji: '🦋', who: { en: 'A nervous moth', es: 'Una polilla nerviosa' }, clue: { en: 'It only comes out after dark, and it snaps up my cousins.', es: 'Solo sale después de oscurecer, y se come a mis primos.' } },
+        { emoji: '💡', who: { en: 'The porch light', es: 'La luz del porche' }, clue: { en: 'It walks straight up the wall beside me and across the ceiling.', es: 'Camina por la pared a mi lado y cruza el techo.' } },
+        { emoji: '🐈', who: { en: 'Señor Bigotes, at the window', es: 'Señor Bigotes, en la ventana' }, clue: { en: 'I watch it every night. When the porch gets busy it slips away to the street lamp.', es: 'Lo veo cada noche. Cuando hay movimiento en el porche se escapa hacia el farol de la calle.' } },
+      ] },
+      { zone: 'street', nextOptions: ['garden', 'sky', 'creek'], witnesses: [
+        { emoji: '🕷️', who: { en: 'A jumping spider', es: 'Una araña saltarina' }, clue: { en: 'It hunts like me, but it has scales and four legs, not eight.', es: 'Caza como yo, pero tiene escamas y cuatro patas, no ocho.' } },
+        { emoji: '🐦‍⬛', who: { en: 'A sleepy grackle', es: 'Un zanate con sueño' }, clue: { en: 'It chirps! A tiny chirp. Then it ran along the fence to the garden shed.', es: '¡Hace un chirrido! Muy chiquito. Luego corrió por la cerca hasta el cobertizo del jardín.' } },
+        { emoji: '🔦', who: { en: 'The street lamp', es: 'El farol' }, clue: { en: 'It is smaller than your hand, and so pale you can almost see through it.', es: 'Es más pequeño que su mano, y tan pálido que casi se puede ver a través de él.' } },
+      ] },
+      { zone: 'garden', witnesses: [
+        { emoji: '🐌', who: { en: 'A garden snail', es: 'Un caracol' }, clue: { en: 'Its family came from across the sea long ago. Now it lives on our walls.', es: 'Su familia vino del otro lado del mar hace mucho. Ahora vive en nuestras paredes.' } },
+        { emoji: '🦎', who: { en: 'A green anole', es: 'Un anolis verde' }, clue: { en: 'People mix us up. I am green and hunt by day. It is pale and hunts by night.', es: 'La gente nos confunde. Yo soy verde y cazo de día. Él es pálido y caza de noche.' } },
+        { emoji: '🧱', who: { en: 'The shed wall', es: 'La pared del cobertizo' }, clue: { en: 'Sticky toes. It left no marks on me at all.', es: 'Dedos pegajosos. No me dejó ninguna marca.' } },
+      ] },
     ],
-    options: [
-      { id: 'treefrog', emoji: '🐸', label: { en: 'Green treefrog', es: 'Rana arborícola' } },
-      { id: 'gecko', emoji: '🦎', label: { en: 'Mediterranean gecko', es: 'Geco mediterráneo' } },
-      { id: 'bat', emoji: '🦇', label: { en: 'Bat', es: 'Murciélago' } },
-      { id: 'jumpingspider', emoji: '🕷️', label: { en: 'Jumping spider', es: 'Araña saltarina' } },
-    ],
-    answerId: 'gecko',
     reveal: { en: 'It was the Mediterranean gecko. Lights draw moths, and the gecko has learned to wait there.', es: 'Fue el geco mediterráneo. Las luces atraen polillas, y el geco aprendió a esperar ahí.' },
     action: { en: 'Leave it be. It eats insects around your door for free.', es: 'Déjelo tranquilo. Come gratis los insectos de su puerta.' } },
-  { id: 'm-lights', kind: 'wild', sample: false,
-    title: { en: 'The case of the blinking yard', es: 'El caso del jardín que parpadea' },
-    intro: { en: 'Tiny lights blink on and off over the grass at dusk. Who is sending signals?', es: 'Lucecitas se prenden y apagan sobre el pasto al atardecer. ¿Quién manda señales?' },
-    clues: [
-      { en: 'It happens on warm evenings in late spring.', es: 'Pasa en tardes cálidas a fines de primavera.' },
-      { en: 'The signals are messages to find a mate.', es: 'Las señales son mensajes para encontrar pareja.' },
-      { en: 'It is a beetle that makes its own light.', es: 'Es un escarabajo que hace su propia luz.' },
-    ],
-    options: [
-      { id: 'dragonfly', emoji: '🪰', label: { en: 'Dragonfly', es: 'Libélula' } },
-      { id: 'cicada', emoji: '🪲', label: { en: 'Cicada', es: 'Chicharra' } },
-      { id: 'firefly', emoji: '✨', label: { en: 'Firefly', es: 'Luciérnaga' } },
-      { id: 'monarch', emoji: '🦋', label: { en: 'Monarch', es: 'Monarca' } },
-    ],
-    answerId: 'firefly',
-    reveal: { en: 'It was the firefly. Bright outdoor lights make it hard for fireflies to see each other.', es: 'Fue la luciérnaga. Las luces exteriores fuertes les dificultan verse entre ellas.' },
-    action: { en: 'Turn off a porch light at dusk in firefly season.', es: 'Apague una luz del porche al atardecer en temporada de luciérnagas.' } },
-  { id: 'm-glove', kind: 'pet', sample: true,
+  { id: 'case-glove', kind: 'pet', sample: true, culpritId: 'pet-biscuit', hours: 24,
     title: { en: 'The case of the missing garden glove', es: 'El caso del guante de jardín perdido' },
-    intro: { en: 'A glove vanished from the garden work day. Which neighborhood pet is the suspect?', es: 'Un guante desapareció del día de trabajo en el huerto. ¿Qué mascota del vecindario es sospechosa?' },
-    clues: [
-      { en: 'The suspect was seen near the park in the evening.', es: 'Vieron al sospechoso cerca del parque por la tarde.' },
-      { en: 'A few golden hairs were left on the fence.', es: 'Quedaron unos pelos dorados en la cerca.' },
-      { en: 'The suspect is known for carrying things home.', es: 'El sospechoso es famoso por llevarse cosas a casa.' },
+    briefing: { en: 'Detective, a glove vanished from the garden work day. One of the neighborhood pets knows more than it is saying.', es: 'Detective, un guante desapareció del día de trabajo en el huerto. Una de las mascotas del vecindario sabe más de lo que dice.' },
+    stops: [
+      { zone: 'garden', nextOptions: ['creek', 'sky', 'park'], witnesses: [
+        { emoji: '🧤', who: { en: 'The other glove', es: 'El otro guante' }, clue: { en: 'My partner was carried off gently. No holes. Just a little drool.', es: 'A mi pareja se la llevaron con cuidado. Sin agujeros. Solo un poco de baba.' } },
+        { emoji: '🐈‍⬛', who: { en: 'Mochi, on her porch', es: 'Mochi, en su porche' }, clue: { en: 'I saw everything. The thief has a tail that never stops wagging. It headed for the park.', es: 'Lo vi todo. El ladrón tiene una cola que nunca deja de moverse. Se fue hacia el parque.' } },
+        { emoji: '🐢', who: { en: 'Olive the tortoise', es: 'Olive, la tortuga' }, clue: { en: 'It was not me. I am far too slow. It was fast, and golden.', es: 'Yo no fui. Soy demasiado lenta. Era rápido, y dorado.' } },
+      ] },
+      { zone: 'park', nextOptions: ['yard', 'street', 'creek'], witnesses: [
+        { emoji: '🐿️', who: { en: 'A fox squirrel', es: 'Una ardilla zorro' }, clue: { en: 'A dog trotted by with something in its mouth, proud as a parade.', es: 'Un perro pasó trotando con algo en el hocico, orgulloso como en un desfile.' } },
+        { emoji: '🪑', who: { en: 'A park bench', es: 'Una banca del parque' }, clue: { en: 'Somebody left golden hairs on my seat.', es: 'Alguien dejó pelos dorados en mi asiento.' } },
+        { emoji: '🐕‍🦺', who: { en: 'Pepper', es: 'Pepper' }, clue: { en: 'Not me. I chase leaves. The one you want walks home down the street every evening.', es: 'Yo no. Yo persigo hojas. El que busca camina a casa por la calle cada tarde.' } },
+      ] },
+      { zone: 'street', witnesses: [
+        { emoji: '🦮', who: { en: 'Duke', es: 'Duke' }, clue: { en: 'I am too old for stealing. But I know who carries sticks, socks and gloves.', es: 'Estoy muy viejo para robar. Pero sé quién carga palos, calcetines y guantes.' } },
+        { emoji: '📬', who: { en: 'A mailbox', es: 'Un buzón' }, clue: { en: 'It passes me every evening on the way home from the park.', es: 'Pasa junto a mí cada tarde de regreso del parque.' } },
+        { emoji: '📖', who: { en: 'The pet pages', es: 'Las páginas de mascotas' }, clue: { en: 'Read what each pet loves. One of them loves carrying things.', es: 'Lea lo que le encanta a cada mascota. A una le encanta cargar cosas.' } },
+      ] },
     ],
-    options: [
-      { id: 'pet-bigotes', emoji: '🐈', label: { en: 'Señor Bigotes', es: 'Señor Bigotes' } },
-      { id: 'pet-pepper', emoji: '🐕‍🦺', label: { en: 'Pepper', es: 'Pepper' } },
-      { id: 'pet-biscuit', emoji: '🐕', label: { en: 'Biscuit', es: 'Biscuit' } },
-      { id: 'pet-olive', emoji: '🐢', label: { en: 'Olive', es: 'Olive' } },
-    ],
-    answerId: 'pet-biscuit',
     reveal: { en: 'It was Biscuit. The glove was returned, slightly damp, with a wagging tail.', es: 'Fue Biscuit. El guante fue devuelto, un poco mojado, con la cola moviéndose.' },
     action: { en: 'Read the pet pages. The clues to the next case are hidden there.', es: 'Lea las páginas de mascotas. Ahí están escondidas las pistas del próximo caso.' } },
 ];
+
+/**
+ * Invented habits used to fill the Patterns page until real sightings exist.
+ * Weights are [yard, garden, street, park, creek, sky], [dawn, day, dusk, night] and a season.
+ */
+export const sampleHabits: Record<string, Habit> = {
+  squirrel: { zones: [3, 1, 4, 3, 0, 0], times: [2, 6, 2, 0], season: 'all' },
+  cardinal: { zones: [5, 2, 1, 2, 1, 0], times: [4, 4, 2, 0], season: 'all' },
+  grackle: { zones: [1, 0, 5, 3, 0, 1], times: [1, 3, 6, 0], season: 'all', byTime: { day: [1, 0, 3, 6, 0, 0], dusk: [0, 0, 9, 1, 0, 0] } },
+  dove: { zones: [4, 1, 3, 1, 0, 1], times: [3, 5, 2, 0], season: 'all' },
+  anole: { zones: [5, 4, 0, 1, 0, 0], times: [0, 9, 1, 0], season: 'warm' },
+  mockingbird: { zones: [3, 1, 4, 2, 0, 0], times: [3, 4, 2, 1], season: 'all' },
+  bluejay: { zones: [3, 0, 3, 4, 0, 0], times: [3, 6, 1, 0], season: 'all' },
+  wren: { zones: [6, 3, 0, 1, 0, 0], times: [5, 4, 1, 0], season: 'all' },
+  raccoon: { zones: [4, 1, 1, 1, 3, 0], times: [1, 0, 3, 6], season: 'all', byTime: { dusk: [1, 0, 0, 1, 8, 0], night: [6, 1, 1, 1, 1, 0] } },
+  opossum: { zones: [6, 1, 1, 1, 1, 0], times: [0, 0, 2, 8], season: 'all' },
+  gecko: { zones: [8, 1, 1, 0, 0, 0], times: [0, 0, 1, 9], season: 'warm' },
+  fritillary: { zones: [3, 6, 0, 1, 0, 0], times: [0, 9, 1, 0], season: 'warm' },
+  honeybee: { zones: [3, 6, 0, 1, 0, 0], times: [1, 9, 0, 0], season: 'warm' },
+  toad: { zones: [6, 2, 1, 0, 1, 0], times: [0, 0, 2, 8], season: 'warm' },
+  bat: { zones: [0, 0, 0, 0, 1, 9], times: [0, 0, 8, 2], season: 'warm' },
+  ladybeetle: { zones: [2, 7, 0, 1, 0, 0], times: [1, 9, 0, 0], season: 'warm' },
+  dragonfly: { zones: [2, 2, 0, 1, 5, 0], times: [0, 8, 2, 0], season: 'summer' },
+  deer: { zones: [1, 0, 0, 2, 7, 0], times: [5, 0, 5, 0], season: 'all', byTime: { dawn: [0, 0, 0, 1, 9, 0], dusk: [2, 0, 0, 6, 2, 0] } },
+  monarch: { zones: [2, 6, 0, 2, 0, 0], times: [0, 9, 1, 0], season: 'migration' },
+  jumpingspider: { zones: [6, 3, 1, 0, 0, 0], times: [0, 10, 0, 0], season: 'warm' },
+  rolypoly: { zones: [3, 7, 0, 0, 0, 0], times: [3, 5, 2, 0], season: 'all' },
+  cicada: { zones: [3, 0, 5, 2, 0, 0], times: [0, 6, 4, 0], season: 'summer' },
+  hawk: { zones: [0, 0, 2, 3, 4, 1], times: [3, 6, 1, 0], season: 'all', byTime: { dawn: [0, 0, 1, 2, 7, 0], day: [0, 0, 3, 5, 1, 1] } },
+  slider: { zones: [0, 0, 0, 0, 10, 0], times: [1, 9, 0, 0], season: 'warm' },
+};
 
 export const bingoCards: BingoCard[] = [
   { id: 'cool', title: { en: 'Fall and winter bingo', es: 'Lotería de otoño e invierno' },

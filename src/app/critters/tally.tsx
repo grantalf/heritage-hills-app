@@ -1,7 +1,7 @@
 import { Lock } from 'lucide-react-native';
 import { View } from 'react-native';
 
-import { Emoji, ProgressBar } from '@/components/game';
+import { CritterPic, ProgressBar } from '@/components/game';
 import { Card, Notice, SampleTag, Screen, SectionTitle, Txt } from '@/components/ui';
 import { useLoad } from '@/lib/data/provider';
 import { tally } from '@/lib/game';
@@ -50,7 +50,7 @@ export default function TallyScreen() {
           const critter = byId.get(row.critterId);
           return critter ? (
             <View key={row.critterId} style={{ flexDirection: 'row', alignItems: 'center', gap: space.md }}>
-              <Emoji size={28}>{critter.emoji}</Emoji>
+              <CritterPic id={critter.id} emoji={critter.emoji} size={40} />
               <Txt style={{ flex: 1 }}>{tl(critter.name)}</Txt>
               <Txt variant="label">{String(row.count)}</Txt>
             </View>

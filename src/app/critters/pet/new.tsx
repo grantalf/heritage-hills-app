@@ -2,7 +2,11 @@ import { router } from 'expo-router';
 import { Check, Lock } from 'lucide-react-native';
 import { useState } from 'react';
 
-import { Btn, Choices, Field, Notice, Screen, Txt } from '@/components/ui';
+import { View } from 'react-native';
+
+import { CritterArt } from '@/components/critter-art';
+import { Btn, Card, Choices, Field, Notice, Screen, Txt } from '@/components/ui';
+import { buildPetArt, EAR_IDS, FUR_IDS, MARK_IDS, type EarId, type FurId, type MarkId } from '@/lib/data/game-art';
 import type { PetKind } from '@/lib/data/game-types';
 import { useT } from '@/lib/i18n';
 import { useSession } from '@/lib/session';
@@ -16,6 +20,10 @@ export default function NewPetScreen() {
   const [name, setName] = useState('');
   const [about, setAbout] = useState('');
   const [hello, setHello] = useState('');
+  const [fur, setFur] = useState<FurId>('golden');
+  const [ears, setEars] = useState<EarId>('floppy');
+  const [mark, setMark] = useState<MarkId>('none');
+  const art = buildPetArt(kind, fur, ears, mark);
   const ready = name.trim().length >= 2 && about.trim().length >= 5;
 
   return (
@@ -28,7 +36,7 @@ export default function NewPetScreen() {
           label={t('critters.savePet')}
           disabled={!ready}
           onPress={() => {
-            void repo.addPet({ name: name.trim(), kind, about: about.trim(), hello: hello.trim() || t('critters.helloDefault') });
+            void repo.addPet({ name: name.trim(), kind, about: about.trim(), hello: hello.trim() || t('critters.helloDefault'), art });
             router.back();
           }}
         />
@@ -36,6 +44,21 @@ export default function NewPetScreen() {
       <Notice tone="primary" icon={Lock} title={t('critters.addPetRuleTitle')} body={t('critters.addPetRuleBody')} />
       <Txt variant="label">{t('critters.petKindLabel')}</Txt>
       <Choices label={t('critters.petKindLabel')} value={kind} onChange={setKind} options={KINDS.map((k) => ({ value: k, label: t(`critters.petKind.${k}`) }))} />
+      <Card>
+        <Txt variant="lead">{t('critters.makerTitle')}</Txt>
+        <Txt variant="small" tone="secondary">
+          {t('critters.makerHint')}
+        </Txt>
+        <View style={{ alignItems: 'center' }}>
+          <CritterArt spec={art} size={150} />
+        </View>
+        <Txt variant="label">{t('critters.makerFur')}</Txt>
+        <Choices label={t('critters.makerFur')} value={fur} onChange={setFur} options={FUR_IDS.map((f) => ({ value: f, label: t(`critters.fur.${f}`) }))} />
+        <Txt variant="label">{t('critters.makerEars')}</Txt>
+        <Choices label={t('critters.makerEars')} value={ears} onChange={setEars} options={EAR_IDS.map((e) => ({ value: e, label: t(`critters.ears.${e}`) }))} />
+        <Txt variant="label">{t('critters.makerMark')}</Txt>
+        <Choices label={t('critters.makerMark')} value={mark} onChange={setMark} options={MARK_IDS.map((m) => ({ value: m, label: t(`critters.mark.${m}`) }))} />
+      </Card>
       <Field label={t('critters.petNameLabel')} value={name} onChangeText={setName} maxLength={30} />
       <Field label={t('critters.petAboutLabel')} hint={t('critters.petAboutHint')} value={about} onChangeText={setAbout} maxLength={120} />
       <Field label={t('critters.petHelloLabel')} hint={t('critters.petHelloHint')} value={hello} onChangeText={setHello} maxLength={120} />

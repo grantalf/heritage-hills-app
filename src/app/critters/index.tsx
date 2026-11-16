@@ -14,7 +14,7 @@ const BADGE_EMOJI = { firstFind: '🔎', sharpEyes: '👀', allKinds: '🌈', ni
 export default function CritterClubScreen() {
   const { t, tl } = useT();
   const { repo } = useSession();
-  const data = useLoad(async (r) => ({ critters: await r.listCritters(), cards: await r.listBingoCards(), mysteries: await r.listMysteries(), pets: await r.listPets() }));
+  const data = useLoad(async (r) => ({ critters: await r.listCritters(), cards: await r.listBingoCards(), cases: await r.listCases(), pets: await r.listPets() }));
   const game = repo.getGame();
   if (!data) return <Screen title={t('critters.title')}>{null}</Screen>;
 
@@ -47,20 +47,21 @@ export default function CritterClubScreen() {
         <EmojiRow emoji="🐾" title={t('critters.pets')} subtitle={t('critters.petsCount', { met: game.petsMet.length, total: data.pets.length })} href="/critters/pets" />
         <EmojiRow emoji="🎯" title={t('critters.bingo')} subtitle={t('critters.bingoHint')} href="/critters/bingo" />
         <EmojiRow emoji="🌎" title={t('critters.tally')} subtitle={t('critters.tallyHint')} href="/critters/tally" />
+        <EmojiRow emoji="🧭" title={t('critters.patterns')} subtitle={t('critters.patternsHint')} href="/critters/patterns" />
       </View>
 
       <SectionTitle>{t('critters.mysteries')}</SectionTitle>
       <Txt tone="secondary">{t('critters.mysteriesHint')}</Txt>
       <View style={{ gap: space.sm }}>
-        {data.mysteries.map((m) => {
+        {data.cases.map((m) => {
           const result = game.mysteries[m.id];
           return (
             <EmojiRow
               key={m.id}
-              emoji={result ? (result.solved ? '✅' : '📘') : '🕵️'}
+              emoji={result ? (result.solved ? '✅' : '📁') : '🕵️'}
               title={tl(m.title)}
               subtitle={result ? (result.solved ? t('critters.caseSolved') : t('critters.caseLearned')) : t('critters.caseOpen')}
-              href={{ pathname: '/critters/mystery/[id]', params: { id: m.id } }}
+              href={{ pathname: '/critters/case/[id]', params: { id: m.id } }}
             />
           );
         })}
@@ -91,7 +92,7 @@ export default function CritterClubScreen() {
       </View>
 
       <Notice tone="primary" icon={Users} title={t('critters.familyTitle')} body={t('critters.familyBody')} />
-      <EmojiRow emoji="🧭" title={t('critters.rules')} subtitle={t('critters.rulesHint')} href="/critters/rules" />
+      <EmojiRow emoji="🤝" title={t('critters.rules')} subtitle={t('critters.rulesHint')} href="/critters/rules" />
       <View style={{ flexDirection: 'row', gap: space.sm, alignItems: 'center' }}>
         <Tag tone="draft" label={t('common.draft')} />
         <Txt variant="small" tone="secondary" style={{ flex: 1 }}>

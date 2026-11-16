@@ -26,6 +26,8 @@ export default function PetsScreen() {
           <EmojiRow
             key={pet.id}
             emoji={pet.emoji}
+            picId={pet.id}
+            art={pet.art}
             title={pet.name}
             subtitle={tl(pet.about)}
             href={{ pathname: '/critters/pet/[id]', params: { id: pet.id } }}
@@ -42,7 +44,7 @@ export default function PetsScreen() {
       <Txt variant="small" tone="secondary">
         {t('critters.straysNote')}
       </Txt>
-      <EmojiRow emoji="🧭" title={t('critters.rules')} subtitle={t('critters.rulesHint')} href="/critters/rules" />
+      <EmojiRow emoji="🤝" title={t('critters.rules')} subtitle={t('critters.rulesHint')} href="/critters/rules" />
     </Screen>
   );
 }

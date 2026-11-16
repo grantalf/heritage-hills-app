@@ -3,7 +3,9 @@ import { ChevronLeft, ChevronRight } from 'lucide-react-native';
 import type { ReactNode } from 'react';
 import { I18nManager, Pressable, Text, View } from 'react-native';
 
+import { CritterArt, type ArtSpec } from '@/components/critter-art';
 import { Txt, useUI } from '@/components/ui';
+import { critterArt, petArt } from '@/lib/data/game-art';
 import { radius, space } from '@/lib/theme';
 
 /** Placeholder picture. Decorative: the name next to it carries the meaning. */
@@ -20,8 +22,21 @@ export function Emoji({ children, size = 32, dim }: { children: string; size?: n
   );
 }
 
+/** The cartoon character for an animal or pet, or its emoji if it has none yet. */
+export function CritterPic({ id, art, emoji, size = 48, dim }: { id?: string; art?: ArtSpec; emoji: string; size?: number; dim?: boolean }) {
+  const spec = art ?? (id ? (critterArt[id] ?? petArt[id]) : undefined);
+  if (spec) return <CritterArt spec={spec} size={size} dim={dim} />;
+  return (
+    <Emoji size={Math.round(size * 0.75)} dim={dim}>
+      {emoji}
+    </Emoji>
+  );
+}
+
 export function EmojiRow({
   emoji,
+  picId,
+  art,
   title,
   subtitle,
   href,
@@ -29,6 +44,8 @@ export function EmojiRow({
   dim,
 }: {
   emoji: string;
+  picId?: string;
+  art?: ArtSpec;
   title: string;
   subtitle?: string;
   href: Href;
@@ -52,10 +69,14 @@ export function EmojiRow({
         borderRadius: round(radius.lg),
         backgroundColor: pressed ? c.surfaceStrong : c.surface,
       })}>
-      <View style={{ width: 48, alignItems: 'center' }}>
-        <Emoji size={34} dim={dim}>
-          {emoji}
-        </Emoji>
+      <View style={{ width: 52, alignItems: 'center' }}>
+        {picId || art ? (
+          <CritterPic id={picId} art={art} emoji={emoji} size={52} dim={dim} />
+        ) : (
+          <Emoji size={34} dim={dim}>
+            {emoji}
+          </Emoji>
+        )}
       </View>
       <View style={{ flex: 1, gap: 2 }}>
         <Txt variant="lead">{title}</Txt>

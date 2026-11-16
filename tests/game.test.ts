@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 
-import { bingoCards, critters, mysteries, samplePets, sampleTallyBase } from '../src/lib/data/game-content';
+import { bingoCards, critters, samplePets, sampleTallyBase } from '../src/lib/data/game-content';
 import type { GameState, Sighting } from '../src/lib/data/game-types';
 import { bingoLines, cardForMonth, earnedBadges, emptyGame, GROUPS, mysteryPoints, POINTS, rankFor, tally, totalPoints } from '../src/lib/game';
 
@@ -59,18 +59,9 @@ test('bingo cards have nine squares and fit the season', () => {
   assert.equal(cardForMonth(bingoCards, 6).id, 'warm');
 });
 
-test('mysteries: fewer clues earns more, a wrong guess earns nothing', () => {
+test('cases: a faster solve earns more, an unsolved case earns nothing', () => {
   assert.ok(mysteryPoints({ solved: true, cluesUsed: 1 }) > mysteryPoints({ solved: true, cluesUsed: 3 }));
   assert.equal(mysteryPoints({ solved: false, cluesUsed: 1 }), 0);
-});
-
-test('every mystery has its answer among four options', () => {
-  for (const m of mysteries) {
-    assert.equal(m.options.length, 4, m.id);
-    assert.ok(m.options.some((o) => o.id === m.answerId), m.id);
-    const known = m.kind === 'wild' ? critters.map((c) => c.id) : samplePets.map((p) => p.id);
-    for (const o of m.options) assert.ok(known.includes(o.id), `${m.id}: ${o.id}`);
-  }
 });
 
 test('badges are earned by what the player did', () => {
@@ -78,7 +69,7 @@ test('badges are earned by what the player did', () => {
   const state: GameState = {
     sightings: [sight('bat'), sight('owl'), sight('gecko'), sight('monarch'), sight('honeybee'), sight('hummingbird'), sight('slider', 'creek'), sight('toad'), sight('rolypoly')],
     petsMet: ['a', 'b', 'c'],
-    mysteries: { 'm-holes': { solved: true, cluesUsed: 2 } },
+    mysteries: { 'case-holes': { solved: true, cluesUsed: 2 } },
     bingo: { cool: ['c1', 'c2', 'c3'] },
   };
   const earned = earnedBadges(state, critters, bingoCards);

@@ -9,6 +9,9 @@ import { canApprove, isHiddenByReports, type Audience, type ConsentField, type C
 import { emptyGame } from '../game';
 import * as content from './content';
 import * as game from './game-content';
+import type { ArtSpec } from '@/components/critter-art';
+
+import { addObservation, emptyObservations, sampleObservations } from '../patterns';
 import type { GameState, Pet, PetKind, Zone } from './game-types';
 import type { AlertDraft, FlowersState, PendingAlert, Repository, RsvpAnswer } from './repository';
 import type {
@@ -345,7 +348,7 @@ export class SampleRepository implements Repository {
   async getPet(id: string) {
     return [...this.state.myPets, ...game.samplePets].find((p) => p.id === id);
   }
-  addPet(input: { name: string; kind: PetKind; about: string; hello: string }) {
+  addPet(input: { name: string; kind: PetKind; about: string; hello: string; art?: ArtSpec }) {
     const same = { en: '', es: '' };
     const pet: Pet = {
       id: 'mypet-' + Date.now().toString(36),
@@ -358,6 +361,7 @@ export class SampleRepository implements Repository {
       loves: same,
       where: same,
       stories: [],
+      art: input.art,
       mine: true,
       sample: false,
     };
@@ -377,15 +381,17 @@ export class SampleRepository implements Repository {
   pendingPetStories(petId: string) {
     return this.state.pendingStories[petId] ?? 0;
   }
-  async listMysteries() {
-    return game.mysteries;
+  async listCases() {
+    return game.cases;
   }
-  async answerMystery(id: string, optionId: string, cluesUsed: number) {
-    const mystery = game.mysteries.find((m) => m.id === id);
-    if (!mystery || this.state.game.mysteries[id]) return false;
-    const solved = mystery.answerId === optionId;
-    await this.commit({ ...this.state, game: { ...this.state.game, mysteries: { ...this.state.game.mysteries, [id]: { solved, cluesUsed } } } });
-    return solved;
+  finishCase(id: string, solved: boolean, level: number) {
+    if (this.state.game.mysteries[id]?.solved) return Promise.resolve();
+    return this.commit({ ...this.state, game: { ...this.state.game, mysteries: { ...this.state.game.mysteries, [id]: { solved, cluesUsed: level } } } });
+  }
+  async getObservations() {
+    let all = sampleObservations(game.sampleTallyBase, game.sampleHabits);
+    for (const s of this.state.game.sightings) all = addObservation(all, s.critterId, s.zone, new Date(s.at));
+    return all ?? emptyObservations();
   }
   async listBingoCards() {
     return game.bingoCards;

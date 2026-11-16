@@ -6,7 +6,11 @@
  */
 import type { RecordEntry, VerifyResult } from '../audit';
 import type { Audience, ConsentField, ConsentRow, PendingAction } from '../rules';
-import type { BingoCard, Critter, GameState, Mystery, Pet, PetKind, Zone } from './game-types';
+import type { ArtSpec } from '@/components/critter-art';
+
+import type { DetectiveCase } from '../cases';
+import type { Observations } from '../patterns';
+import type { BingoCard, Critter, GameState, Pet, PetKind, Zone } from './game-types';
 import type {
   Alert,
   AlertKind,
@@ -118,14 +122,17 @@ export interface Repository {
   listPets(): Promise<Pet[]>;
   getPet(id: string): Promise<Pet | undefined>;
   /** Only a pet's own family adds a pet. */
-  addPet(input: { name: string; kind: PetKind; about: string; hello: string }): Promise<void>;
+  addPet(input: { name: string; kind: PetKind; about: string; hello: string; art?: ArtSpec }): Promise<void>;
   removePet(id: string): Promise<void>;
   meetPet(id: string): Promise<void>;
   /** A story goes to the pet's family to approve. It is not shown until they do. */
   submitPetStory(petId: string, text: string): Promise<void>;
   pendingPetStories(petId: string): number;
-  listMysteries(): Promise<Mystery[]>;
-  answerMystery(id: string, optionId: string, cluesUsed: number): Promise<boolean>;
+  listCases(): Promise<DetectiveCase[]>;
+  /** Records how a case ended. level is 1 (plenty of time left) to 3. */
+  finishCase(id: string, solved: boolean, level: number): Promise<void>;
+  /** Wildlife counts by kind of place, time of day and month. Never pets, never addresses. */
+  getObservations(): Promise<Observations>;
   listBingoCards(): Promise<BingoCard[]>;
   toggleBingo(cardId: string, squareId: string): Promise<void>;
 
