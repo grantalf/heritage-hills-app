@@ -2,6 +2,7 @@ import assert from 'node:assert/strict';
 import { test } from 'node:test';
 
 import * as content from '../src/lib/data/content';
+import * as game from '../src/lib/data/game-content';
 import type { L } from '../src/lib/data/types';
 import { en } from '../src/lib/i18n/en';
 import { es } from '../src/lib/i18n/es';
@@ -58,6 +59,10 @@ test('every piece of content has English and Spanish', () => {
     gardenSteps: content.gardenSteps,
     offices: content.offices,
     docs: content.associationDocs,
+    critters: game.critters,
+    pets: game.samplePets,
+    mysteries: game.mysteries,
+    bingo: game.bingoCards,
   };
   const found: { path: string; text: L }[] = [];
   collect(all, 'content', found);

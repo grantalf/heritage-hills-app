@@ -2,8 +2,11 @@ import { Bell, BookOpen, HandHeart, Landmark, Leaf, PiggyBank, Sprout, Wrench } 
 import { View } from 'react-native';
 
 import { EventRow } from '@/components/event-row';
+import { Emoji } from '@/components/game';
 import { ALERT_ICON } from '@/components/icons';
-import { Card, Notice, RowLink, SampleTag, Screen, SectionTitle, Txt } from '@/components/ui';
+import { Btn, Card, Notice, RowLink, SampleTag, Screen, SectionTitle, Txt } from '@/components/ui';
+import { router } from 'expo-router';
+
 import { useLoad } from '@/lib/data/provider';
 import { monthName } from '@/lib/dates';
 import { useT } from '@/lib/i18n';
@@ -29,6 +32,19 @@ export default function HomeScreen() {
       {alerts && alerts.length > 2 ? (
         <RowLink icon={Bell} title={t('home.allAlerts', { count: alerts.length })} href="/alerts" />
       ) : null}
+
+      <Card tone="soft">
+        <View style={{ flexDirection: 'row', gap: space.sm, justifyContent: 'center' }}>
+          <Emoji size={34}>🦝</Emoji>
+          <Emoji size={34}>🐕</Emoji>
+          <Emoji size={34}>🦋</Emoji>
+          <Emoji size={34}>🐈</Emoji>
+          <Emoji size={34}>🦉</Emoji>
+        </View>
+        <Txt variant="title">{t('critters.homeTitle')}</Txt>
+        <Txt>{t('critters.homeBody')}</Txt>
+        <Btn label={t('critters.homeButton')} onPress={() => router.push('/critters')} />
+      </Card>
 
       {tips && tips.length > 0 ? (
         <Card tone="soft">

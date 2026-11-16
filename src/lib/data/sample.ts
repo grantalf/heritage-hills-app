@@ -6,7 +6,10 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import { appendEntry, verifyChain, type RecordEntry, type VerifyResult } from '../audit';
 import { canApprove, isHiddenByReports, type Audience, type ConsentField, type ConsentRow, type Report } from '../rules';
+import { emptyGame } from '../game';
 import * as content from './content';
+import * as game from './game-content';
+import type { GameState, Pet, PetKind, Zone } from './game-types';
 import type { AlertDraft, FlowersState, PendingAlert, Repository, RsvpAnswer } from './repository';
 import type {
   Alert,
@@ -36,6 +39,9 @@ type State = {
   consent: ConsentRow[];
   pendingAlert?: PendingAlert;
   postedAlerts: Alert[];
+  game: GameState;
+  myPets: Pet[];
+  pendingStories: Record<string, number>;
 };
 
 const emptyState = (): State => ({
@@ -50,6 +56,9 @@ const emptyState = (): State => ({
   pollVotes: {},
   consent: [],
   postedAlerts: [],
+  game: emptyGame(),
+  myPets: [],
+  pendingStories: {},
 });
 
 /** Simulates other neighbors' reports so the "two reports hide an item" rule can be seen. */
@@ -61,6 +70,8 @@ export class SampleRepository implements Repository {
   private loaded: Promise<void> | undefined;
   private decisions: RecordEntry<DecisionContent>[] = [];
   private readonly startedAt = new Date();
+  /** Photos are kept in memory only: never saved, never sent. */
+  private photos = new Map<string, string>();
 
   constructor() {
     let chain: RecordEntry<DecisionContent>[] = [];
@@ -81,7 +92,10 @@ export class SampleRepository implements Repository {
     if (!this.loaded) {
       this.loaded = AsyncStorage.getItem(STORAGE_KEY)
         .then((raw) => {
-          if (raw) this.state = { ...emptyState(), ...(JSON.parse(raw) as Partial<State>) };
+          if (raw) {
+            const saved = JSON.parse(raw) as Partial<State>;
+            this.state = { ...emptyState(), ...saved, game: { ...emptyGame(), ...saved.game } };
+          }
         })
         .catch(() => {
           // Storage can be unavailable (private browsing, previews). Keep working in memory.
@@ -297,7 +311,89 @@ export class SampleRepository implements Repository {
     return { accessLevel: role, ...mine };
   }
   deleteMyData() {
+    this.photos.clear();
     return this.commit({ ...emptyState(), postedAlerts: this.state.postedAlerts });
+  }
+
+  // ---- Critter Club ----
+  async listCritters() {
+    return game.critters;
+  }
+  async getCritter(id: string) {
+    return game.critters.find((c) => c.id === id);
+  }
+  getGame() {
+    return this.state.game;
+  }
+  addSighting(critterId: string, zone: Zone, photoUri?: string) {
+    const id = 'sight-' + Date.now().toString(36) + '-' + this.state.game.sightings.length;
+    if (photoUri) this.photos.set(id, photoUri);
+    const sighting = { id, critterId, zone, at: new Date().toISOString(), hasPhoto: !!photoUri };
+    return this.commit({ ...this.state, game: { ...this.state.game, sightings: [sighting, ...this.state.game.sightings] } });
+  }
+  getSightingPhoto(sightingId: string) {
+    return this.photos.get(sightingId);
+  }
+  async getTally() {
+    const counts: Record<string, number> = { ...game.sampleTallyBase };
+    for (const s of this.state.game.sightings) counts[s.critterId] = (counts[s.critterId] ?? 0) + 1;
+    return { counts, goal: game.SAMPLE_TALLY_GOAL };
+  }
+  async listPets() {
+    return [...this.state.myPets, ...game.samplePets];
+  }
+  async getPet(id: string) {
+    return [...this.state.myPets, ...game.samplePets].find((p) => p.id === id);
+  }
+  addPet(input: { name: string; kind: PetKind; about: string; hello: string }) {
+    const same = { en: '', es: '' };
+    const pet: Pet = {
+      id: 'mypet-' + Date.now().toString(36),
+      kind: input.kind,
+      emoji: { dog: '🐕', cat: '🐈', other: '🐾' }[input.kind],
+      name: input.name,
+      // A family's own words are shown as written, in every language.
+      about: { en: input.about, es: input.about },
+      hello: { en: input.hello, es: input.hello },
+      loves: same,
+      where: same,
+      stories: [],
+      mine: true,
+      sample: false,
+    };
+    return this.commit({ ...this.state, myPets: [pet, ...this.state.myPets] });
+  }
+  removePet(id: string) {
+    return this.commit({ ...this.state, myPets: this.state.myPets.filter((p) => p.id !== id) });
+  }
+  meetPet(id: string) {
+    if (this.state.game.petsMet.includes(id)) return Promise.resolve();
+    return this.commit({ ...this.state, game: { ...this.state.game, petsMet: [...this.state.game.petsMet, id] } });
+  }
+  submitPetStory(petId: string, _text: string) {
+    // The draft does not keep the words. It only counts that a story is waiting for the family.
+    return this.commit({ ...this.state, pendingStories: { ...this.state.pendingStories, [petId]: (this.state.pendingStories[petId] ?? 0) + 1 } });
+  }
+  pendingPetStories(petId: string) {
+    return this.state.pendingStories[petId] ?? 0;
+  }
+  async listMysteries() {
+    return game.mysteries;
+  }
+  async answerMystery(id: string, optionId: string, cluesUsed: number) {
+    const mystery = game.mysteries.find((m) => m.id === id);
+    if (!mystery || this.state.game.mysteries[id]) return false;
+    const solved = mystery.answerId === optionId;
+    await this.commit({ ...this.state, game: { ...this.state.game, mysteries: { ...this.state.game.mysteries, [id]: { solved, cluesUsed } } } });
+    return solved;
+  }
+  async listBingoCards() {
+    return game.bingoCards;
+  }
+  toggleBingo(cardId: string, squareId: string) {
+    const marked = this.state.game.bingo[cardId] ?? [];
+    const next = marked.includes(squareId) ? marked.filter((m) => m !== squareId) : [...marked, squareId];
+    return this.commit({ ...this.state, game: { ...this.state.game, bingo: { ...this.state.game.bingo, [cardId]: next } } });
   }
 
   // ---- Board tools ----

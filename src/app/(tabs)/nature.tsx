@@ -1,6 +1,7 @@
 import { Sprout } from 'lucide-react-native';
 import { View } from 'react-native';
 
+import { EmojiRow } from '@/components/game';
 import { ECO_ICON } from '@/components/icons';
 import { Bullets, Card, RowLink, Screen, SectionTitle, Tag, Txt } from '@/components/ui';
 import { useLoad } from '@/lib/data/provider';
@@ -23,6 +24,7 @@ export default function NatureScreen() {
         <Bullets items={(tips ?? []).map((tip) => tl(tip.text))} />
       </Card>
 
+      <EmojiRow emoji="🦉" title={t('critters.title')} subtitle={t('critters.subtitle')} href="/critters" />
       <RowLink icon={Sprout} title={t('garden.title')} subtitle={t('garden.subtitle')} href="/garden" />
 
       <SectionTitle>{t('nature.ecosystem')}</SectionTitle>

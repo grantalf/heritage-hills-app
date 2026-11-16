@@ -6,6 +6,7 @@
  */
 import type { RecordEntry, VerifyResult } from '../audit';
 import type { Audience, ConsentField, ConsentRow, PendingAction } from '../rules';
+import type { BingoCard, Critter, GameState, Mystery, Pet, PetKind, Zone } from './game-types';
 import type {
   Alert,
   AlertKind,
@@ -104,6 +105,29 @@ export interface Repository {
   /** Everything this device holds about the person, in plain form. */
   exportMyData(): Promise<Record<string, unknown>>;
   deleteMyData(): Promise<void>;
+
+  // Critter Club (docs/GAME.md). Progress is the player's own. Only counts are shared.
+  listCritters(): Promise<Critter[]>;
+  getCritter(id: string): Promise<Critter | undefined>;
+  getGame(): GameState;
+  /** photoUri stays on the device in the first draft. Later it goes to a review queue first. */
+  addSighting(critterId: string, zone: Zone, photoUri?: string): Promise<void>;
+  getSightingPhoto(sightingId: string): string | undefined;
+  /** Neighborhood counts per animal, and the shared goal. Never who or exactly where. */
+  getTally(): Promise<{ counts: Record<string, number>; goal: number }>;
+  listPets(): Promise<Pet[]>;
+  getPet(id: string): Promise<Pet | undefined>;
+  /** Only a pet's own family adds a pet. */
+  addPet(input: { name: string; kind: PetKind; about: string; hello: string }): Promise<void>;
+  removePet(id: string): Promise<void>;
+  meetPet(id: string): Promise<void>;
+  /** A story goes to the pet's family to approve. It is not shown until they do. */
+  submitPetStory(petId: string, text: string): Promise<void>;
+  pendingPetStories(petId: string): number;
+  listMysteries(): Promise<Mystery[]>;
+  answerMystery(id: string, optionId: string, cluesUsed: number): Promise<boolean>;
+  listBingoCards(): Promise<BingoCard[]>;
+  toggleBingo(cardId: string, squareId: string): Promise<void>;
 
   // Board tools (two-approver rule).
   getPendingAlert(): PendingAlert | undefined;

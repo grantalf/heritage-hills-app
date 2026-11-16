@@ -2,6 +2,7 @@ import { router } from 'expo-router';
 import { Flower2, HandHeart, HeartHandshake, LogIn, Mail, Wrench } from 'lucide-react-native';
 import { View } from 'react-native';
 
+import { EmojiRow } from '@/components/game';
 import { Btn, Notice, RowLink, Screen } from '@/components/ui';
 import { useLoad } from '@/lib/data/provider';
 import { useT } from '@/lib/i18n';
@@ -30,6 +31,7 @@ export default function NeighborsScreen() {
           href="/invites"
         />
         <RowLink icon={Flower2} title={t('flowers.title')} subtitle={t('flowers.subtitle')} href="/flowers" />
+        <EmojiRow emoji="🐾" title={t('critters.pets')} subtitle={t('critters.petsSubtitle')} href="/critters/pets" />
         <RowLink icon={HandHeart} title={t('help.title')} subtitle={t('help.subtitle')} href="/help" />
       </View>
     </Screen>

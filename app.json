@@ -35,7 +35,15 @@
           "imageWidth": 76
         }
       ],
-      "expo-localization"
+      "expo-localization",
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "Lets you add your own animal photos to the Critter Club game.",
+          "cameraPermission": "Lets you photograph animals for the Critter Club game.",
+          "microphonePermission": false
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true,
