@@ -44,6 +44,10 @@ Format: ID | date | decision | why | alternatives | status. "Proposed" means the
 - D-001 | 2026-11-15 | React Native + Expo + TypeScript, one codebase for iOS, Android and web | Reach, cloud builds | Native per platform; Flutter | proposed
 - D-034 | 2026-11-16 | Expo SDK 58 (current). Expo Router. Own small i18n module. Lucide icons with react-native-svg | Store Expo Go runs only the newest SDK; few dependencies | Older SDK | accepted
 - D-027 | 2026-11-16 | All data access goes through one interface. First draft uses a local sample adapter. Backend (Supabase paid tier vs another service) decided with the funding plan | Supabase's free tier pauses after a week idle; swappable backend avoids lock-in | Commit to Supabase now | proposed. Supersedes D-002
+- D-040 | 2026-11-16 | Turn off the experimental React Compiler | It cached values read from the data store, so RSVPs, sign-ups and role changes never appeared on screen. Found by the end-to-end check | Keep it on and restructure every data read | accepted
+- D-041 | 2026-11-16 | Three style directions (Warm Community, Clean Civic, Texas Wildflower) live inside the app under Settings, so they can be judged on real screens. Every palette must pass the contrast tests | Faster and more honest than static mockups | Separate design mockups | proposed, awaiting founder's pick
+- D-042 | 2026-11-16 | A single-file web preview is published privately after each milestone so the draft can be opened from a link with no setup | Lowest effort way for the founder and board to see progress | Phone-only previews | accepted
+- D-043 | 2026-11-16 | Unknown addresses redirect to Home | Old or mistyped links should never show an error page | Error screen | accepted
 - D-006 | 2026-11-15 | No social login | Tracking; Apple's Sign in with Apple rule | Google or Facebook login | proposed
 - D-015 | 2026-11-15 | Strongest model time goes to red-team, spec, security and architecture first | Limited access | Even spread | done
 - D-016 | 2026-11-15 | Reusable review skills saved to the founder's account | Same checks every milestone | Re-explain each time | done
