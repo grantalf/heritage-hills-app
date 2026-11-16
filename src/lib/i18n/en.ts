@@ -319,7 +319,7 @@ export const en = {
   'privacy.audience.nobody': 'Nobody',
   'privacy.audience.coordinator': 'Program coordinators',
   'privacy.audience.neighbors': 'Verified neighbors',
-  'privacy.history': 'You have made {count} privacy choices. Each one is kept as a record you can download.',
+  'privacy.history': 'Privacy choices you have made: {count}. Each one is kept as a record you can see below.',
   'privacy.yourData': 'Your information',
   'privacy.download': 'Show my information',
   'privacy.downloadNote': 'This is everything the app holds about you.',

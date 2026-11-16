@@ -94,7 +94,6 @@ export function Screen({
   const { c } = useUI();
   const { t } = useT();
   const insets = useSafeAreaInsets();
-  const canGoBack = back && router.canGoBack();
   return (
     <View style={{ flex: 1, backgroundColor: c.background }}>
       <View style={{ backgroundColor: c.sample, paddingTop: insets.top }}>
@@ -117,7 +116,7 @@ export function Screen({
           <Pressable
             accessibilityRole="button"
             accessibilityLabel={t('common.back')}
-            onPress={() => (canGoBack ? router.back() : router.replace('/'))}
+            onPress={() => (router.canGoBack() ? router.back() : router.replace('/'))}
             style={({ pressed }) => [styles.backButton, { opacity: pressed ? 0.6 : 1 }]}>
             {I18nManager.isRTL ? <ChevronRight color={c.primary} size={24} /> : <ChevronLeft color={c.primary} size={24} />}
             <Txt tone="primary" variant="lead">
@@ -266,6 +265,7 @@ export function Btn({
       accessibilityLabel={label}
       accessibilityHint={hint}
       accessibilityState={{ disabled: !!disabled }}
+      aria-disabled={!!disabled}
       disabled={disabled}
       onPress={onPress}
       style={({ pressed }) => [
@@ -340,6 +340,7 @@ export function CheckRow({ label, hint, checked, onChange }: { label: string; hi
     <Pressable
       accessibilityRole="checkbox"
       accessibilityState={{ checked }}
+      aria-checked={checked}
       accessibilityLabel={label}
       accessibilityHint={hint}
       onPress={() => onChange(!checked)}
@@ -380,6 +381,7 @@ export function Choices<T extends string | number>({
             key={String(option.value)}
             accessibilityRole="radio"
             accessibilityState={{ selected, checked: selected }}
+            aria-checked={selected}
             accessibilityLabel={option.label}
             onPress={() => onChange(option.value)}
             style={({ pressed }) => [

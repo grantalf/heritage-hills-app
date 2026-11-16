@@ -25,8 +25,8 @@ export default function VolunteerScreen() {
               <View style={{ flex: 1, gap: 4 }}>
                 <Txt variant="lead">{tl(o.title)}</Txt>
                 <Txt>{tl(o.summary)}</Txt>
-                <View style={{ flexDirection: 'row', gap: 6, alignItems: 'center' }}>
-                  <Clock size={16} color={c.textSecondary} />
+                <View style={{ flexDirection: 'row', gap: 6, alignItems: 'flex-start' }}>
+                  <Clock size={16} color={c.textSecondary} style={{ marginTop: 3 }} />
                   <Txt variant="small" tone="secondary" style={{ flex: 1 }}>
                     {tl(o.when)} · {tl(o.duration)}
                   </Txt>

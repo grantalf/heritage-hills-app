@@ -52,6 +52,7 @@ function TabButton({ icon: Icon, label, isFocused, ...props }: TabTriggerSlotPro
       accessibilityRole="tab"
       accessibilityLabel={label}
       accessibilityState={{ selected: !!isFocused }}
+      aria-selected={!!isFocused}
       style={({ pressed }) => ({
         flex: 1,
         minHeight: 60,

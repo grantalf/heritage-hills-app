@@ -1,56 +1,65 @@
-# Welcome to your Expo app 👋
+# Heritage Hills neighborhood app
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+A phone app (iPhone, Android and web from one codebase) for the Heritage Hills neighborhood in Austin, Texas. It helps neighbors care for their place and for each other.
 
-## Get started
+**Status: first draft.** Everything runs on sample data on the device. Nothing is sent anywhere. Sign-in is simulated.
 
-1. Install dependencies
+## See it on your phone or computer
 
-   ```bash
-   npm install
-   ```
-
-2. Start the app
-
-   ```bash
-   npx expo start
-   ```
-
-In the output, you'll find options to open the app in a
-
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
-
-You can start developing by editing the files inside the **src/app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
-
-## Get a fresh project
-
-When you're ready, run:
+You need [Node.js](https://nodejs.org) 20 or newer.
 
 ```bash
-npm run reset-project
+npm install
+npx expo start
 ```
 
-This command will move the starter code to the **example** directory and create a blank **src/app** directory where you can start developing.
+- **Phone:** install the free **Expo Go** app, then scan the QR code shown in the terminal. Your phone and computer must be on the same Wi-Fi. Expo Go must support Expo SDK 58. If the store version is older, the Expo terminal explains how to get a matching one.
+- **Web browser:** press `w` in the terminal, or run `npx expo start --web`.
 
-### Other setup steps
+In the app, open **More** and use "See the app as…" to switch between Visitor, Neighbor and Board.
 
-- To set up ESLint for linting, run `npx expo lint`, or follow our guide on ["Using ESLint and Prettier"](https://docs.expo.dev/guides/using-eslint/)
-- If you'd like to set up unit testing, follow our guide on ["Unit Testing with Jest"](https://docs.expo.dev/develop/unit-testing/)
-- Learn more about the TypeScript setup in this template in our guide on ["Using TypeScript"](https://docs.expo.dev/guides/typescript/)
+## Checks
 
-## Learn more
+```bash
+npm run check        # type-check, lint and unit tests
+```
 
-To learn more about developing your project with Expo, look at the following resources:
+End-to-end check of the main journeys on the web build (needs Python Playwright and Chrome):
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
+```bash
+EXPO_NO_BUNDLE_SPLITTING=1 npx expo export --platform web --output-dir /tmp/hh-web
+python3 scripts/serve_web.py /tmp/hh-web 8791 &
+python3 scripts/e2e_web.py http://127.0.0.1:8791
+```
 
-## Join the community
+## Where things are
 
-Join our community of developers creating universal apps.
+| Path | What it holds |
+|---|---|
+| `src/app/` | Screens. Each file is a page (Expo Router). `(tabs)/` holds the five main tabs. |
+| `src/components/` | Shared building blocks: buttons, cards, rows. They enforce touch size, labels and text scaling. |
+| `src/lib/i18n/` | Interface text in English (`en.ts`) and Spanish (`es.ts`). |
+| `src/lib/data/` | The single doorway to data (`repository.ts`), the sample adapter (`sample.ts`) and first-draft content (`content.ts`). |
+| `src/lib/audit.ts` | Tamper-evident decision record (hash chain). |
+| `src/lib/rules.ts` | Safety rules: two reports hide an item, two-approver rule, consent ledger, small-count hiding. |
+| `src/lib/theme.ts` | Neutral placeholder colors and sizes. The real style will replace these. |
+| `tests/` | Unit tests for the record, the rules and the content. |
+| `docs/` | Product spec, security design, red-team review and decisions log. |
 
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+## Rules for anyone working on this
+
+1. **No real resident data** in code, samples, screenshots or prompts. Use invented data and label it `sample: true`.
+2. **Sample data never ships** in a store build.
+3. **Every interface string** goes in both `en.ts` and `es.ts`. The tests fail if they differ.
+4. **Content with facts** needs a source link and a "last checked" date.
+5. **Screens only talk to `Repository`.** A real backend later replaces `SampleRepository` without changing screens.
+6. Use `start`/`end` in layouts, never `left`/`right`, so right-to-left languages work.
+7. Read `AGENTS.md` before touching Expo APIs. They change every release.
+
+## Decisions and plans
+
+See `docs/DECISIONS.md`, `docs/SPEC.md`, `docs/SECURITY.md` and `docs/REDTEAM.md`. The same documents live in the Claude Project "Heritage Hills App", along with `STATUS.md`.
+
+## Ownership
+
+This code is held in a personal repository until the neighborhood association has its own GitHub organization. It is meant to belong to the association.

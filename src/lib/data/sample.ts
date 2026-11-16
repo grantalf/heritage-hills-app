@@ -85,6 +85,10 @@ export class SampleRepository implements Repository {
         })
         .catch(() => {
           // Storage can be unavailable (private browsing, previews). Keep working in memory.
+        })
+        .then(() => {
+          // Screens that read saved choices directly (role, RSVPs) need to redraw once they load.
+          this.listeners.forEach((l) => l());
         });
     }
     return this.loaded;

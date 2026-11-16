@@ -7,6 +7,9 @@ const Ctx = createContext<Repository | undefined>(undefined);
 
 export function RepoProvider({ children }: { children: ReactNode }) {
   const repo = useMemo<Repository>(() => new SampleRepository(), []);
+  useEffect(() => {
+    void repo.ready();
+  }, [repo]);
   return <Ctx.Provider value={repo}>{children}</Ctx.Provider>;
 }
 

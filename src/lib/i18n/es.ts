@@ -322,7 +322,7 @@ export const es: Record<StringKey, string> = {
   'privacy.audience.nobody': 'Nadie',
   'privacy.audience.coordinator': 'Coordinadores de programas',
   'privacy.audience.neighbors': 'Vecinos verificados',
-  'privacy.history': 'Usted ha hecho {count} elecciones de privacidad. Cada una se guarda como un registro que puede descargar.',
+  'privacy.history': 'Elecciones de privacidad que usted ha hecho: {count}. Cada una se guarda como un registro que puede ver abajo.',
   'privacy.yourData': 'Su información',
   'privacy.download': 'Mostrar mi información',
   'privacy.downloadNote': 'Esto es todo lo que la aplicación guarda sobre usted.',
