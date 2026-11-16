@@ -8,7 +8,7 @@ import { useT } from '@/lib/i18n';
 import { radius, space } from '@/lib/theme';
 
 export function EventRow({ event }: { event: CommunityEvent }) {
-  const { c } = useUI();
+  const { c, round } = useUI();
   const { t, tl, language } = useT();
   const parts = dayParts(event.startsAt, language);
   const time = clock(event.startsAt, language);
@@ -21,11 +21,11 @@ export function EventRow({ event }: { event: CommunityEvent }) {
         flexDirection: 'row',
         gap: space.md,
         padding: space.md,
-        borderRadius: radius.lg,
+        borderRadius: round(radius.lg),
         backgroundColor: pressed ? c.surfaceStrong : c.surface,
         alignItems: 'center',
       })}>
-      <View style={{ width: 62, alignItems: 'center', backgroundColor: c.primarySoft, borderRadius: radius.md, paddingVertical: space.sm }}>
+      <View style={{ width: 62, alignItems: 'center', backgroundColor: c.primarySoft, borderRadius: round(radius.md), paddingVertical: space.sm }}>
         <Txt variant="label" tone="primary">
           {parts.month}
         </Txt>

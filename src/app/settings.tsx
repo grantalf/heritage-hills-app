@@ -1,10 +1,10 @@
-import { Languages, Type } from 'lucide-react-native';
+import { Languages, Palette, Type } from 'lucide-react-native';
 import { View } from 'react-native';
 
-import { Card, Choices, IconBubble, Screen, Txt } from '@/components/ui';
+import { Btn, Card, Choices, IconBubble, Notice, Screen, Tag, Txt } from '@/components/ui';
 import { useT } from '@/lib/i18n';
 import { LANGUAGES, TEXT_SCALES, usePrefs, type TextScale } from '@/lib/prefs';
-import { space } from '@/lib/theme';
+import { LOOK_IDS, space } from '@/lib/theme';
 
 const SCALE_KEY: Record<TextScale, 'settings.size.normal' | 'settings.size.large' | 'settings.size.xlarge'> = {
   1: 'settings.size.normal',
@@ -14,7 +14,7 @@ const SCALE_KEY: Record<TextScale, 'settings.size.normal' | 'settings.size.large
 
 export default function SettingsScreen() {
   const { t } = useT();
-  const { language, setLanguage, textScale, setTextScale } = usePrefs();
+  const { language, setLanguage, textScale, setTextScale, look, setLook } = usePrefs();
 
   return (
     <Screen title={t('settings.title')} subtitle={t('settings.subtitle')}>
@@ -43,6 +43,24 @@ export default function SettingsScreen() {
         <Txt variant="small" tone="secondary">
           {t('settings.textSizeNote')}
         </Txt>
+      </Card>
+
+      <Card>
+        <View style={{ flexDirection: 'row', gap: space.md, alignItems: 'center' }}>
+          <IconBubble icon={Palette} />
+          <Txt variant="lead" style={{ flex: 1 }}>
+            {t('settings.look')}
+          </Txt>
+        </View>
+        <Txt variant="small" tone="secondary">
+          {t('settings.lookNote')}
+        </Txt>
+        <Choices label={t('settings.look')} value={look} onChange={setLook} options={LOOK_IDS.map((id) => ({ value: id, label: t(`settings.look.${id}`) }))} />
+        <Txt variant="title">{t(`settings.look.${look}`)}</Txt>
+        <Txt>{t(`settings.lookAbout.${look}`)}</Txt>
+        <Notice tone="good" icon={Palette} title={t('settings.lookSampleTitle')} body={t('settings.lookSampleBody')} />
+        <Btn label={t('settings.lookSampleButton')} onPress={() => undefined} />
+        <Tag label={t('settings.lookChecked')} tone="good" />
       </Card>
     </Screen>
   );

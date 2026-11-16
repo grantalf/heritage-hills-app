@@ -12,6 +12,7 @@ import type { ReactNode } from 'react';
 import {
   I18nManager,
   Linking,
+  Platform,
   Pressable,
   ScrollView,
   StyleSheet,
@@ -29,13 +30,29 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { useT } from '@/lib/i18n';
 import { usePrefs } from '@/lib/prefs';
-import { dark, fontSize, light, MAX_CONTENT_WIDTH, MIN_TOUCH, radius, space, type Palette } from '@/lib/theme';
+import { fontSize, LOOKS, MAX_CONTENT_WIDTH, MIN_TOUCH, radius, space, type Palette } from '@/lib/theme';
 
-export function useUI(): { c: Palette; fs: (size: keyof typeof fontSize) => number; scale: number } {
+const SERIF = Platform.select({ ios: 'Georgia', android: 'serif', default: 'Georgia, "Times New Roman", serif' });
+
+export function useUI(): {
+  c: Palette;
+  fs: (size: keyof typeof fontSize) => number;
+  scale: number;
+  /** Corner radius adjusted for the chosen look. */
+  round: (size: number) => number;
+  headingFont: string | undefined;
+} {
   const scheme = useColorScheme();
-  const { textScale } = usePrefs();
-  const c = scheme === 'dark' ? dark : light;
-  return { c, scale: textScale, fs: (size) => Math.round(fontSize[size] * textScale) };
+  const { textScale, look } = usePrefs();
+  const chosen = LOOKS[look];
+  const c = scheme === 'dark' ? chosen.dark : chosen.light;
+  return {
+    c,
+    scale: textScale,
+    fs: (size) => Math.round(fontSize[size] * textScale),
+    round: (size) => Math.round(size * chosen.roundness),
+    headingFont: chosen.serifHeadings ? SERIF : undefined,
+  };
 }
 
 type Variant = 'display' | 'title' | 'lead' | 'body' | 'small' | 'label';
@@ -48,10 +65,10 @@ export function Txt({
   children,
   ...rest
 }: TextProps & { variant?: Variant; tone?: Tone; children: ReactNode }) {
-  const { c, fs } = useUI();
+  const { c, fs, headingFont } = useUI();
   const sizes: Record<Variant, TextStyle> = {
-    display: { fontSize: fs('display'), lineHeight: fs('display') * 1.2, fontWeight: '700' },
-    title: { fontSize: fs('title'), lineHeight: fs('title') * 1.25, fontWeight: '700' },
+    display: { fontSize: fs('display'), lineHeight: fs('display') * 1.2, fontWeight: '700', fontFamily: headingFont },
+    title: { fontSize: fs('title'), lineHeight: fs('title') * 1.25, fontWeight: '700', fontFamily: headingFont },
     lead: { fontSize: fs('lead'), lineHeight: fs('lead') * 1.35, fontWeight: '600' },
     body: { fontSize: fs('body'), lineHeight: fs('body') * 1.45 },
     small: { fontSize: fs('small'), lineHeight: fs('small') * 1.4 },
@@ -147,9 +164,9 @@ export function Screen({
 }
 
 export function Card({ children, style, tone }: { children: ReactNode; style?: StyleProp<ViewStyle>; tone?: 'plain' | 'soft' }) {
-  const { c } = useUI();
+  const { c, round } = useUI();
   return (
-    <View style={[{ backgroundColor: tone === 'soft' ? c.primarySoft : c.surface, borderRadius: radius.lg, padding: space.lg, gap: space.sm }, style]}>
+    <View style={[{ backgroundColor: tone === 'soft' ? c.primarySoft : c.surface, borderRadius: round(radius.lg), padding: space.lg, gap: space.sm }, style]}>
       {children}
     </View>
   );
@@ -198,14 +215,14 @@ export function RowLink({
   right?: ReactNode;
   tone?: 'primary' | 'urgent' | 'notice' | 'good' | 'neutral';
 }) {
-  const { c } = useUI();
+  const { c, round } = useUI();
   const Chevron = I18nManager.isRTL ? ChevronLeft : ChevronRight;
   return (
     <Pressable
       accessibilityRole="button"
       accessibilityLabel={subtitle ? `${title}. ${subtitle}` : title}
       onPress={onPress ?? (() => href && router.push(href))}
-      style={({ pressed }) => [styles.row, { backgroundColor: pressed ? c.surfaceStrong : c.surface }]}>
+      style={({ pressed }) => [styles.row, { backgroundColor: pressed ? c.surfaceStrong : c.surface, borderRadius: round(radius.lg) }]}>
       {icon ? <IconBubble icon={icon} tone={tone} /> : null}
       <View style={{ flex: 1, gap: 2 }}>
         <Txt variant="lead">{title}</Txt>
@@ -222,9 +239,9 @@ export function RowLink({
 
 /** Same look as RowLink, but it is information only and cannot be pressed. */
 export function InfoRow({ icon, title, subtitle, right }: { icon?: LucideIcon; title: string; subtitle?: string; right?: ReactNode }) {
-  const { c } = useUI();
+  const { c, round } = useUI();
   return (
-    <View accessible accessibilityLabel={subtitle ? `${title}. ${subtitle}` : title} style={[styles.row, { backgroundColor: c.surface }]}>
+    <View accessible accessibilityLabel={subtitle ? `${title}. ${subtitle}` : title} style={[styles.row, { backgroundColor: c.surface, borderRadius: round(radius.lg) }]}>
       {icon ? <IconBubble icon={icon} tone="neutral" /> : null}
       <View style={{ flex: 1, gap: 2 }}>
         <Txt variant="lead">{title}</Txt>
@@ -255,7 +272,7 @@ export function Btn({
   disabled?: boolean;
   hint?: string;
 }) {
-  const { c } = useUI();
+  const { c, round } = useUI();
   const bg = { primary: c.primary, secondary: 'transparent', quiet: 'transparent', danger: 'transparent' }[kind];
   const fg = { primary: c.onPrimary, secondary: c.primary, quiet: c.primary, danger: c.urgent }[kind];
   const border = { primary: c.primary, secondary: c.primary, quiet: 'transparent', danger: c.urgent }[kind];
@@ -270,7 +287,7 @@ export function Btn({
       onPress={onPress}
       style={({ pressed }) => [
         styles.button,
-        { backgroundColor: bg, borderColor: border, opacity: disabled ? 0.45 : pressed ? 0.75 : 1 },
+        { backgroundColor: bg, borderColor: border, borderRadius: round(radius.md), opacity: disabled ? 0.45 : pressed ? 0.75 : 1 },
       ]}>
       {Icon ? <Icon color={fg} size={22} /> : null}
       <Txt variant="lead" style={{ color: fg, textAlign: 'center', flexShrink: 1 }}>
@@ -314,12 +331,12 @@ export function Notice({
   tone?: 'urgent' | 'notice' | 'good' | 'primary';
   children?: ReactNode;
 }) {
-  const { c } = useUI();
+  const { c, round } = useUI();
   const bg = { urgent: c.urgentSoft, notice: c.noticeSoft, good: c.goodSoft, primary: c.primarySoft }[tone];
   const fg = { urgent: c.urgent, notice: c.notice, good: c.good, primary: c.primary }[tone];
   const Icon = icon;
   return (
-    <View style={{ backgroundColor: bg, borderRadius: radius.lg, padding: space.lg, gap: space.sm, borderStartWidth: 5, borderStartColor: fg }}>
+    <View style={{ backgroundColor: bg, borderRadius: round(radius.lg), padding: space.lg, gap: space.sm, borderStartWidth: 5, borderStartColor: fg }}>
       <View style={{ flexDirection: 'row', gap: space.sm, alignItems: 'flex-start' }}>
         <Icon color={fg} size={24} />
         <Txt variant="lead" style={{ flex: 1 }}>
@@ -334,7 +351,7 @@ export function Notice({
 
 /** A labeled checkbox row. */
 export function CheckRow({ label, hint, checked, onChange }: { label: string; hint?: string; checked: boolean; onChange: (next: boolean) => void }) {
-  const { c } = useUI();
+  const { c, round } = useUI();
   const Icon = checked ? CircleCheck : Circle;
   return (
     <Pressable
@@ -344,7 +361,7 @@ export function CheckRow({ label, hint, checked, onChange }: { label: string; hi
       accessibilityLabel={label}
       accessibilityHint={hint}
       onPress={() => onChange(!checked)}
-      style={({ pressed }) => [styles.row, { backgroundColor: pressed ? c.surfaceStrong : c.surface }]}>
+      style={({ pressed }) => [styles.row, { backgroundColor: pressed ? c.surfaceStrong : c.surface, borderRadius: round(radius.lg) }]}>
       <Icon color={checked ? c.primary : c.textSecondary} size={28} />
       <View style={{ flex: 1, gap: 2 }}>
         <Txt variant="lead">{label}</Txt>
@@ -434,7 +451,7 @@ export function Bullets({ items }: { items: string[] }) {
 
 /** A text box with its label always visible. */
 export function Field({ label, hint, ...rest }: TextInputProps & { label: string; hint?: string }) {
-  const { c, fs } = useUI();
+  const { c, fs, round } = useUI();
   return (
     <View style={{ gap: 6 }}>
       <Txt variant="label">{label}</Txt>
@@ -453,7 +470,7 @@ export function Field({ label, hint, ...rest }: TextInputProps & { label: string
             minHeight: 52,
             borderWidth: 1.5,
             borderColor: c.border,
-            borderRadius: radius.md,
+            borderRadius: round(radius.md),
             paddingHorizontal: space.lg,
             paddingVertical: space.md,
             fontSize: fs('body'),
