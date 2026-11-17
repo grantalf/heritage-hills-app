@@ -23,7 +23,7 @@ export default function TestStreetScreen() {
   const { c } = useUI();
   const insets = useSafeAreaInsets();
   const params = useLocalSearchParams<{ look?: string }>();
-  const [look, setLook] = useState<LookId>(LOOK_IDS.includes(params.look as LookId) ? (params.look as LookId) : 'thinShaded');
+  const [look, setLook] = useState<LookId>(LOOK_IDS.includes(params.look as LookId) ? (params.look as LookId) : 'thickShaded');
   const [difficulty, setDifficulty] = useState<Difficulty>('gentle');
   const [frost, setFrost] = useState(false);
   const [auto, setAuto] = useState(false);

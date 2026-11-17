@@ -17,7 +17,7 @@ const LETTER: Record<LookId, string> = { thinFlat: 'A', thinShaded: 'B', thickFl
 export default function StyleSheetsScreen() {
   const { t, tl } = useT();
   const { c } = useUI();
-  const [chosen, setChosen] = useState<LookId>('thinShaded');
+  const [chosen, setChosen] = useState<LookId>('thickShaded');
   const [moving, setMoving] = useState(false);
   const [clock, setClock] = useState(0);
 
