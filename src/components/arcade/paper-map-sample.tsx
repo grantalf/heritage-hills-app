@@ -243,22 +243,24 @@ function Picture() {
 
 type LabelKind = 'title' | 'region' | 'place' | 'road';
 
-function Label({ x, y, rotate = 0, kind, children }: { x: number; y: number; rotate?: number; kind: LabelKind; children: string }) {
+function Label({ x, y, rotate = 0, kind, end, children }: { x: number; y: number; rotate?: number; kind: LabelKind; end?: boolean; children: string }) {
   const { scale } = useUI();
   const color = kind === 'region' ? PAPER.red : PAPER.ink;
-  const size = (kind === 'road' ? 10.5 : kind === 'title' ? 14 : 11.5) * scale;
+  // The picture cannot reflow, so labels grow a little with the text-size setting, not all the way. The full map adds pinch to zoom.
+  const size = (kind === 'road' ? 10.5 : kind === 'title' ? 14 : 11.5) * Math.min(scale, 1.15);
+  const width = kind === 'region' ? 130 : 220;
   return (
     <View pointerEvents="none" style={{ position: 'absolute', left: `${(x / W) * 100}%`, top: `${(y / H) * 100}%`, width: 0, height: 0, alignItems: 'center', justifyContent: 'center' }}>
-      <View style={{ width: 220, alignItems: 'center', transform: [{ rotate: `${rotate}deg` }] }}>
+      <View style={{ width, alignItems: end ? 'flex-end' : 'center', transform: [{ translateX: end ? -width / 2 : 0 }, { rotate: `${rotate}deg` }] }}>
         <Txt
           variant={kind === 'title' ? 'label' : 'small'}
-          numberOfLines={1}
+          numberOfLines={kind === 'region' ? 2 : 1}
           style={{
             color,
             fontFamily: 'Georgia',
             fontStyle: kind === 'road' || kind === 'place' ? 'italic' : 'normal',
             fontWeight: kind === 'region' || kind === 'title' ? '700' : '400',
-            letterSpacing: kind === 'region' ? 1.2 : 0,
+            letterSpacing: kind === 'region' ? 1 : 0,
             textTransform: kind === 'region' ? 'uppercase' : 'none',
             fontSize: size,
             lineHeight: size * 1.3,
@@ -285,7 +287,7 @@ export function PaperMapSample() {
       <Label x={74} y={232} kind="road">N</Label>
       <Label x={112} y={30} kind="title">{t('papermap.mapTitle')}</Label>
       <Label x={118} y={73} kind="place">{t('papermap.creek')}</Label>
-      <Label x={292} y={73} kind="place">{t('papermap.bridge')}</Label>
+      <Label x={344} y={100} end kind="place">{t('papermap.bridge')}</Label>
       <Label x={176} y={106} kind="place">{t('papermap.garden')}</Label>
       <Label x={84} y={115} kind="road">Hermitage Drive</Label>
       <Label x={214} y={164} rotate={36} kind="road">Durham Drive</Label>
@@ -293,7 +295,7 @@ export function PaperMapSample() {
       <Label x={125} y={248} rotate={90} kind="road">Loralinda Drive</Label>
       <Label x={243} y={252} rotate={90} kind="road">Danville Drive</Label>
       <Label x={277} y={176} rotate={86} kind="road">Furness Drive</Label>
-      <Label x={328} y={158} rotate={90} kind="region">{t('papermap.frontier')}</Label>
+      <Label x={326} y={182} rotate={90} kind="region">{t('papermap.frontier')}</Label>
       <Label x={300} y={249} kind="place">{t('papermap.armadillos')}</Label>
     </View>
   );

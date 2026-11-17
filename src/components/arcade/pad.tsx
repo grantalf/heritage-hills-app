@@ -5,12 +5,13 @@
  *
  * Left half: touch and slide to move. Right half: touch to bonk.
  */
+import { Move, Star } from 'lucide-react-native';
 import { useRef, useState } from 'react';
 import { View, type GestureResponderEvent, type ViewStyle } from 'react-native';
 
 import { Txt, useUI } from '@/components/ui';
 
-const HEIGHT = 168;
+const HEIGHT = 190;
 /** Stops the browser from selecting text or scrolling while a thumb is on the controls. */
 const NO_SELECT = { userSelect: 'none', touchAction: 'none' } as ViewStyle;
 const DEAD = 12;
@@ -72,21 +73,27 @@ export function Pad({ onInput, moveLabel, bonkLabel, label, disabled }: { onInpu
       onResponderRelease={clear}
       onResponderTerminate={clear}
       style={[{ height: HEIGHT, flexDirection: 'row', direction: 'ltr', opacity: disabled ? 0.4 : 1 }, NO_SELECT]}>
-      <View pointerEvents="none" style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
+      <View pointerEvents="none" style={{ flex: 1, alignItems: 'center', justifyContent: 'center', gap: 4 }}>
         <View style={{ width: 132, height: 132, borderRadius: 66, borderWidth: 2, borderColor: c.border, backgroundColor: c.surface, alignItems: 'center', justifyContent: 'center' }}>
           <Txt variant="label" tone="secondary" style={{ position: 'absolute', top: 6 }}>▲</Txt>
           <Txt variant="label" tone="secondary" style={{ position: 'absolute', bottom: 6 }}>▼</Txt>
           <Txt variant="label" tone="secondary" style={{ position: 'absolute', left: 10 }}>◀</Txt>
           <Txt variant="label" tone="secondary" style={{ position: 'absolute', right: 10 }}>▶</Txt>
           <View style={{ width: 60, height: 60, borderRadius: 30, backgroundColor: c.primary, alignItems: 'center', justifyContent: 'center', transform: [{ translateX: show.dx * 26 }, { translateY: show.dy * 26 }] }}>
-            <Txt variant="label" tone="onPrimary">{moveLabel}</Txt>
+            <Move color={c.onPrimary} size={28} />
           </View>
         </View>
+        <Txt variant="label" maxFontSizeMultiplier={1.6} style={{ textAlign: 'center' }}>
+          {moveLabel}
+        </Txt>
       </View>
-      <View pointerEvents="none" style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
-        <View style={{ width: 116, height: 116, borderRadius: 58, borderWidth: 3, borderColor: c.primary, backgroundColor: show.bonk ? c.primary : c.primarySoft, alignItems: 'center', justifyContent: 'center', transform: [{ scale: show.bonk ? 0.94 : 1 }] }}>
-          <Txt variant="title" style={{ color: show.bonk ? c.onPrimary : c.text }}>{bonkLabel}</Txt>
+      <View pointerEvents="none" style={{ flex: 1, alignItems: 'center', justifyContent: 'center', gap: 8 }}>
+        <View style={{ width: 112, height: 112, borderRadius: 56, borderWidth: 3, borderColor: c.primary, backgroundColor: show.bonk ? c.primary : c.primarySoft, alignItems: 'center', justifyContent: 'center', transform: [{ scale: show.bonk ? 0.94 : 1 }] }}>
+          <Star color={show.bonk ? c.onPrimary : c.primary} size={44} />
         </View>
+        <Txt variant="label" maxFontSizeMultiplier={1.6} style={{ textAlign: 'center' }}>
+          {bonkLabel}
+        </Txt>
       </View>
     </View>
   );

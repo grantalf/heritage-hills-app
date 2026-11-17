@@ -36,7 +36,7 @@ export type Draw = {
   shadow: number;
   /** Drawn pale for a moment after a hit. */
   flash: boolean;
-  /** Blinking while safe after being hurt. */
+  /** Blinking while safe after being hurt: three blinks a second, under the limit for flashing. */
   hidden: boolean;
 };
 
@@ -81,7 +81,7 @@ export function buildScene(world: World, skins: Record<SkinRole, Skin>, fx: Fx[]
     const skin = skins[role];
     if (!skin) continue;
     const onPedestal = a.role === 'boss' && a.state === 'statue' ? 6 : 0;
-    add(`a${a.id}`, skin, animFor(a), a.t, a.x, a.z, a.face < 0, { shadow: onPedestal ? 0 : (SHADOW[a.role] ?? 0), flash: a.flash > 0, hidden: a.safe > 0 && a.state !== 'down' && Math.floor(a.safe * 12) % 2 === 0 }, onPedestal + (a.role === 'shot' ? 12 : 0));
+    add(`a${a.id}`, skin, animFor(a), a.t, a.x, a.z, a.face < 0, { shadow: onPedestal ? 0 : (SHADOW[a.role] ?? 0), flash: a.flash > 0, hidden: a.safe > 0 && a.state !== 'down' && Math.floor(a.safe * 6) % 2 === 0 }, onPedestal + (a.role === 'shot' ? 12 : 0));
     if (a.role === 'boss' && a.state === 'stun') {
       draws.push({ key: `dizzy${a.id}`, sheet: 'fx', frame: frameOf('fx', 'dizzy', a.t), x: Math.round(a.x - world.cameraX + a.face * 26), y: GROUND_TOP + Math.round(a.z) - 44, flip: false, shadow: 0, flash: false, hidden: false, depth: a.z + 0.2 });
     }

@@ -103,3 +103,53 @@ test('effects start from events and end on their own', () => {
   for (let i = 0; i < 60; i++) fx = advanceFx(fx, [], 1 / 60, () => ++id);
   assert.equal(fx.length, 0);
 });
+
+// ---------- colors and the game session ----------
+
+function luminance(hex: string): number {
+  const n = parseInt(hex.slice(1), 16);
+  const channel = (v: number) => {
+    const s = v / 255;
+    return s <= 0.03928 ? s / 12.92 : Math.pow((s + 0.055) / 1.055, 2.4);
+  };
+  return 0.2126 * channel((n >> 16) & 255) + 0.7152 * channel((n >> 8) & 255) + 0.0722 * channel(n & 255);
+}
+const contrast = (a: string, b: string) => {
+  const [hi, lo] = [luminance(a), luminance(b)].sort((x, y) => y - x);
+  return (hi + 0.05) / (lo + 0.05);
+};
+
+test('menu text on wood and parchment meets the 4.5 to 1 contrast rule', async () => {
+  const { MENU, MENU_TEXT_PAIRS } = await import('../src/lib/arcade/menu-colors');
+  for (const [text, background] of MENU_TEXT_PAIRS) {
+    const ratio = contrast(MENU[text], MENU[background]);
+    assert.ok(ratio >= 4.5, `${text} on ${background} is ${ratio.toFixed(2)}`);
+  }
+});
+
+test('a game session steps at a fixed rate, tells its listeners, and never skips ahead on a slow phone', async () => {
+  const { GameSession } = await import('../src/lib/arcade/session');
+  const session = new GameSession();
+  let calls = 0;
+  const stop = session.subscribe(() => (calls += 1));
+  session.start(WORKSHOP_LEVEL, { difficulty: 'gentle', viewW: 180 });
+  assert.equal(session.status, 'start');
+  session.setInput(1, 0, false);
+  const x0 = heroOf(session.world!).x;
+  // Sixty normal frames: one second of walking.
+  for (let i = 0; i < 60; i++) session.advance(1 / 60, 180);
+  const walked = heroOf(session.world!).x - x0;
+  assert.ok(walked > 55 && walked < 66, `walked ${walked}`);
+  // One very long frame moves at most six steps.
+  const before = session.world!.time;
+  session.advance(5, 180);
+  assert.ok(session.world!.time - before <= 6 / 60 + 1e-9);
+  // Watching: the game plays itself to the first wave and says so.
+  for (let i = 0; i < 600 && session.status === 'start'; i++) session.advance(1 / 60, 180, true);
+  assert.equal(session.status, 'waveStart');
+  assert.ok(calls > 60);
+  stop();
+  const frame = session.getFrame();
+  session.advance(1 / 60, 180);
+  assert.ok(session.getFrame() > frame);
+});

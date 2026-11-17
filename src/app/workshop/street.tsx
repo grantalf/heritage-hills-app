@@ -158,7 +158,7 @@ export default function TestStreetScreen() {
               {t('common.back')}
             </Txt>
           </Pressable>
-          <Txt accessibilityRole="header" variant="lead">
+          <Txt accessibilityRole="header" variant="label" numberOfLines={2} maxFontSizeMultiplier={1.6} style={{ flex: 1, textAlign: 'center' }}>
             {t('street.title')}
           </Txt>
           <Pressable
@@ -222,7 +222,7 @@ export default function TestStreetScreen() {
           ) : null}
         </View>
 
-        <Txt accessibilityLiveRegion="polite" aria-live="polite" variant="label" style={{ textAlign: 'center', paddingHorizontal: space.md, paddingVertical: space.sm, minHeight: 44 }}>
+        <Txt accessibilityLiveRegion="polite" aria-live="polite" variant="label" maxFontSizeMultiplier={1.6} style={{ textAlign: 'center', paddingHorizontal: space.md, paddingVertical: space.sm, minHeight: 44 }}>
           {t(`street.status.${session.status}`)}
         </Txt>
 

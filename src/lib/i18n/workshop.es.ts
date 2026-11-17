@@ -3,12 +3,12 @@ import type { workshopEn } from './workshop.en';
 
 export const workshopEs: Record<keyof typeof workshopEn, string> = {
   'workshop.title': 'Taller de juegos',
-  'workshop.subtitle': 'Pruebe el arte nuevo y la primera calle de prueba',
+  'workshop.subtitle': 'Pruebe el arte nuevo y una calle de prueba',
   'workshop.intro': 'Esta es un área de trabajo para los juegos nuevos. Nada aquí es definitivo. Mire, juegue y diga qué le gusta.',
   'workshop.styles': 'Elija un estilo',
   'workshop.stylesHint': 'Cuatro versiones del arte en pixeles',
   'workshop.street': 'Calle de prueba',
-  'workshop.streetHint': 'Juegue el juego de avanzar con arte provisional',
+  'workshop.streetHint': 'Juegue una calle del juego de rescate',
   'workshop.map': 'Muestra del mapa de papel',
   'workshop.mapHint': 'Una esquina del mapa de cuento',
   'workshop.draft': 'Arte provisional. Cada dibujo aquí es nuestro y fue hecho con código. Se volverá a dibujar cuando se elija un estilo.',
@@ -72,7 +72,7 @@ export const workshopEs: Record<keyof typeof workshopEn, string> = {
   'street.status.start': 'Camine a la derecha para empezar.',
   'street.status.waveStart': '¡Monstruos! Deles golpecitos.',
   'street.status.waveClear': 'Todo despejado. Camine a la derecha.',
-  'street.status.bossWake': '¡La estatua está despertando! Sálgase de su carril cuando baje la cabeza.',
+  'street.status.bossWake': '¡La estatua está despertando! Quítese de su camino cuando baje la cabeza.',
   'street.status.bossStun': 'Chocó con la pared y está mareada. ¡Dele golpecitos ahora!',
   'street.status.bossSettle': 'El hechizo se rompió. Es una estatua otra vez.',
   'street.status.cageOpen': '¡La jaula está abierta!',

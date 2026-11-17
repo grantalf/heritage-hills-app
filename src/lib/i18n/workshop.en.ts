@@ -1,12 +1,12 @@
 /** English text for the game workshop (block 1): style sheets, test street, paper map sample. */
 export const workshopEn = {
   'workshop.title': 'Game workshop',
-  'workshop.subtitle': 'Try the new game art and the first test street',
+  'workshop.subtitle': 'Try the new game art and a test street',
   'workshop.intro': 'This is a work area for the new games. Nothing here is final. Look, play, and say what you like.',
   'workshop.styles': 'Pick a look',
   'workshop.stylesHint': 'Four versions of the pixel art',
   'workshop.street': 'Test street',
-  'workshop.streetHint': 'Play the side-scroller with stand-in art',
+  'workshop.streetHint': 'Play one street of the rescue game',
   'workshop.map': 'Paper map sample',
   'workshop.mapHint': 'One corner of the storybook map',
   'workshop.draft': 'Stand-in art. Every drawing here is our own and was made by code. It gets redrawn once a look is picked.',
@@ -51,7 +51,7 @@ export const workshopEn = {
 
   'street.title': 'Test street',
   'street.subtitle': 'Rescue the critters',
-  'street.story': 'Ghouls have caged the neighborhood critters. Bonk the monsters, calm the bewitched statue, and open the cage.',
+  'street.story': 'Ghouls have caged the neighborhood critters. Bonk the monsters, calm the statue that is under a spell, and open the cage.',
   'street.start': 'Start',
   'street.pause': 'Pause',
   'street.resume': 'Keep playing',
@@ -70,7 +70,7 @@ export const workshopEn = {
   'street.status.start': 'Walk right to begin.',
   'street.status.waveStart': 'Monsters! Bonk them.',
   'street.status.waveClear': 'All clear. Walk right.',
-  'street.status.bossWake': 'The statue is waking up! Step out of its lane when it lowers its head.',
+  'street.status.bossWake': 'The statue is waking up! Step out of its way when it lowers its head.',
   'street.status.bossStun': 'It ran into the wall and is dizzy. Bonk it now!',
   'street.status.bossSettle': 'The spell is broken. It is a statue again.',
   'street.status.cageOpen': 'The cage is open!',
