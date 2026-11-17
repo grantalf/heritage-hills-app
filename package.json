@@ -49,6 +49,7 @@
     "typecheck": "tsc --noEmit && tsc --noEmit -p tests",
     "test": "node --import tsx --test tests/*.test.ts",
     "export:web": "expo export --platform web",
+    "sprites": "node --import tsx scripts/make_sprites.mts",
     "check": "npm run typecheck && npm run lint && npm test"
   },
   "private": true

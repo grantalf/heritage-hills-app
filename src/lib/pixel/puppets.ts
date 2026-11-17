@@ -240,13 +240,13 @@ function heroSheet(): SheetDef {
     d({ ...heroIdle, armF: 1.1, held: 0.5, lean: 0.26, x: 2, legF: 0.5, legB: -0.4 }),
     d({ ...heroIdle, armF: 0.9, held: 0.9, lean: 0.14, x: 1 }),
   ]);
-  b.anim('hurt', 1, false, [d({ legF: -0.3, legB: 0.2, armF: -0.8, armB: -1.1, held: 1.2, lean: -0.3, face: 'ouch', x: -1 })]);
-  b.anim('down', 1, false, [d({ legF: 0.9, legB: 0.7, armF: 0.3, armB: 0.2, held: 1.6, lean: -0.5, face: 'ouch', y: 3 })]);
+  b.anim('hurt', 1, false, [d({ legF: -0.3, legB: 0.2, armF: 1.9, armB: -1.1, held: 0.6, lean: -0.3, face: 'ouch', x: -1 })]);
+  b.anim('down', 1, false, [d({ legF: 0.9, legB: 0.7, armF: 1.2, armB: 0.2, held: 0.3, lean: -0.5, face: 'ouch', y: 3 })]);
   b.anim('cheer', 5, true, [
     d({ legF: 0.1, legB: -0.1, armF: 2.9, armB: 2.6, held: 0.2, face: 'happy' }),
     d({ legF: 0.3, legB: -0.3, armF: 3.1, armB: 2.9, held: 0, face: 'happy', y: -3 }),
   ]);
-  return { id: 'hero', cw: 64, ch: 56, ax: 26, ay: 52, frames: b.frames, anims: b.anims };
+  return { id: 'hero', cw: 64, ch: 62, ax: 26, ay: 53, frames: b.frames, anims: b.anims };
 }
 
 const ZOMBIE: Human = {
@@ -443,7 +443,7 @@ function bossSheet(): SheetDef {
   b.anim('stomp', 4, false, [d({ ...awake, lean: -0.22, head: -0.2, legs: [0, -0.9, 0, -1.1], y: -2 }), d({ ...awake, lean: 0.05, head: 0.15, legs: [0, 0.1, 0, 0.1], y: 1 })]);
   b.anim('stun', 4, true, [d({ legs: [0.2, -0.2, 0.3, -0.3], eye: 'dizzy', head: 0.25, y: 1 }), d({ legs: [0.2, -0.2, 0.3, -0.3], eye: 'dizzy', head: 0.15, y: 1, tail: 0.2 })]);
   b.anim('hurt', 1, false, [d({ legs: [0.2, 0.2, 0.2, 0.2], eye: 'wince', head: -0.3, lean: -0.08, shake: -1 })]);
-  return { id: 'boss', cw: 104, ch: 68, ax: 44, ay: 64, frames: b.frames, anims: b.anims };
+  return { id: 'boss', cw: 104, ch: 72, ax: 44, ay: 66, frames: b.frames, anims: b.anims };
 }
 
 // ---------- pets and critters ----------
@@ -499,7 +499,7 @@ function critterSheet(id: string, c: Critter): SheetDef {
   b.anim('idle', 3, true, [d({ legs: [0, 0], tail: 0 }), d({ legs: [0, 0], tail: 0.35, ear: 0.1 })]);
   b.anim('run', 12, true, [d({ legs: [0.8, -0.8], y: -1 }), d({ legs: [0.2, -0.2], y: -3, tail: 0.2 }), d({ legs: [-0.8, 0.8], y: -1 }), d({ legs: [-0.2, 0.2], y: 0, tail: -0.2 })]);
   b.anim('cheer', 6, true, [d({ legs: [0.1, -0.1], happy: true, tail: 0.4 }), d({ legs: [0.5, -0.5], happy: true, y: -4, tail: -0.3, ear: -0.2 })]);
-  return { id, cw: 32, ch: 28, ax: 15, ay: 25, frames: b.frames, anims: b.anims };
+  return { id, cw: 40, ch: 36, ax: 20, ay: 31, frames: b.frames, anims: b.anims };
 }
 
 const DOG: Critter = { base: 'dog', belly: 'cream', ear: 'floppy', earColor: 'dogEar', tail: 'wag', tailColor: 'dog' };
@@ -553,7 +553,7 @@ function propsSheet(): SheetDef {
     },
   ]);
   b.anim('shot', 8, true, [(f) => f.ell('mud', 0, -5, 3.2, 3.2).px('mud', -1, -6, 1, 1, 2), (f) => f.ell('mud', 0, -5, 3.6, 2.8).px('mud', 0, -6, 1, 1, 2)]);
-  return { id: 'props', cw: 56, ch: 32, ax: 27, ay: 29, frames: b.frames, anims: b.anims };
+  return { id: 'props', cw: 60, ch: 36, ax: 30, ay: 32, frames: b.frames, anims: b.anims };
 }
 
 function fxSheet(): SheetDef {
@@ -586,7 +586,7 @@ function fxSheet(): SheetDef {
       star(f, -6, -13, 2.5);
     },
   ]);
-  return { id: 'fx', cw: 32, ch: 28, ax: 16, ay: 26, frames: b.frames, anims: b.anims };
+  return { id: 'fx', cw: 36, ch: 32, ax: 18, ay: 28, frames: b.frames, anims: b.anims };
 }
 
 function backdropSheet(): SheetDef {
@@ -607,7 +607,7 @@ function backdropSheet(): SheetDef {
   b.anim('near', 1, false, [
     (f) =>
       wrap(f, () => {
-        for (let x = 4; x < W; x += 12) f.part(() => f.px('fence', x, -15, 4, 15));
+        for (let x = 6; x < W; x += 16) f.part(() => f.px('fence', x, -15, 4, 15));
         f.part(() => f.px('fence', 0, -11, W, 3));
         for (const [x, r] of [[22, 9], [70, 11], [104, 8]] as const)
           f.part(() => {
@@ -623,16 +623,16 @@ function backdropSheet(): SheetDef {
 export function allSheets(): SheetDef[] {
   return [
     heroSheet(),
-    enemySheet('shambler', ZOMBIE, [56, 52, 22, 48], 'shamble'),
+    enemySheet('shambler', ZOMBIE, [56, 56, 22, 50], 'shamble'),
     // An example of a holiday swap: the same puppet in frosty colors with a scarf.
-    enemySheet('shamblerFrost', { ...ZOMBIE, onTorso: (f) => f.px('band', -5, -11, 10, 2).px('band', -5, -9, 2, 4) }, [56, 52, 22, 48], 'shamble', {
+    enemySheet('shamblerFrost', { ...ZOMBIE, onTorso: (f) => f.px('band', -5, -11, 10, 2).px('band', -5, -9, 2, 4) }, [56, 56, 22, 50], 'shamble', {
       zskin: '#a8dcf0',
       zshirt: '#f4f1e6',
       zpants: '#5a8fc0',
       zhair: '#e8f4fb',
     }),
-    enemySheet('lunger', GHOUL, [56, 48, 22, 44], 'lunge'),
-    enemySheet('tosser', IMP, [40, 40, 16, 36], 'toss'),
+    enemySheet('lunger', GHOUL, [56, 54, 22, 46], 'lunge'),
+    enemySheet('tosser', IMP, [44, 44, 20, 38], 'toss'),
     bossSheet(),
     critterSheet('dog', DOG),
     critterSheet('squirrel', SQUIRREL),
