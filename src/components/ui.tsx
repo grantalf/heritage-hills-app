@@ -8,7 +8,7 @@
  */
 import { router, type Href } from 'expo-router';
 import { ChevronLeft, ChevronRight, Circle, CircleCheck, ExternalLink, type LucideIcon } from 'lucide-react-native';
-import type { ReactNode } from 'react';
+import { createContext, useContext, type ReactNode } from 'react';
 import {
   I18nManager,
   Linking,
@@ -34,6 +34,14 @@ import { fontSize, LOOKS, MAX_CONTENT_WIDTH, MIN_TOUCH, radius, space, type Pale
 
 const SERIF = Platform.select({ ios: 'Georgia', android: 'serif', default: 'Georgia, "Times New Roman", serif' });
 
+/**
+ * A part of the app can wear its own colors (the Critter Club game zone does).
+ * Every building block below follows them. Palettes are checked for contrast in tests.
+ */
+export type UIOverride = { palette: Palette; roundness: number };
+const OverrideCtx = createContext<UIOverride | undefined>(undefined);
+export const UIOverrideProvider = OverrideCtx.Provider;
+
 export function useUI(): {
   c: Palette;
   fs: (size: keyof typeof fontSize) => number;
@@ -44,14 +52,15 @@ export function useUI(): {
 } {
   const scheme = useColorScheme();
   const { textScale, look } = usePrefs();
+  const override = useContext(OverrideCtx);
   const chosen = LOOKS[look];
-  const c = scheme === 'dark' ? chosen.dark : chosen.light;
+  const c = override?.palette ?? (scheme === 'dark' ? chosen.dark : chosen.light);
   return {
     c,
     scale: textScale,
     fs: (size) => Math.round(fontSize[size] * textScale),
-    round: (size) => Math.round(size * chosen.roundness),
-    headingFont: chosen.serifHeadings ? SERIF : undefined,
+    round: (size) => Math.round(size * (override?.roundness ?? chosen.roundness)),
+    headingFont: !override && chosen.serifHeadings ? SERIF : undefined,
   };
 }
 
@@ -101,12 +110,15 @@ export function Screen({
   back = true,
   children,
   footer,
+  hideTitle,
 }: {
   title: string;
   subtitle?: string;
   back?: boolean;
   children: ReactNode;
   footer?: ReactNode;
+  /** The page draws its own title (a game's title sign). */
+  hideTitle?: boolean;
 }) {
   const { c } = useUI();
   const { t } = useT();
@@ -141,10 +153,12 @@ export function Screen({
             </Txt>
           </Pressable>
         )}
-        <View style={{ gap: space.xs }}>
-          <Txt variant="display">{title}</Txt>
-          {subtitle ? <Txt tone="secondary">{subtitle}</Txt> : null}
-        </View>
+        {hideTitle ? null : (
+          <View style={{ gap: space.xs }}>
+            <Txt variant="display">{title}</Txt>
+            {subtitle ? <Txt tone="secondary">{subtitle}</Txt> : null}
+          </View>
+        )}
         {children}
       </ScrollView>
       {footer ? (

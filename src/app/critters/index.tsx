@@ -1,98 +1,65 @@
-import { Users } from 'lucide-react-native';
+/**
+ * Critter Club's title screen (block 3, D-066): it should feel like starting a
+ * game. A wooden sign, a parade of pixel critters, the story, how to play, the
+ * sound switch, and one big button into the map. A plain list is one tap away
+ * for anyone who does not want the map.
+ */
+import { router } from 'expo-router';
+import { Gamepad2, HandHeart, Home, List } from 'lucide-react-native';
 import { View } from 'react-native';
 
-import { Emoji, EmojiRow, ProgressBar } from '@/components/game';
-import { Card, Notice, Screen, SectionTitle, Tag, Txt } from '@/components/ui';
-import { useLoad } from '@/lib/data/provider';
-import { BADGES, earnedBadges, rankFor, spottedIds, totalPoints } from '@/lib/game';
+import { Ink, Parchment, WoodSign } from '@/components/arcade/menu';
+import { PixelCritter } from '@/components/quest/pixel-critter';
+import { Bullets, Btn, CheckRow, Notice, RowLink, Screen, Tag, Txt } from '@/components/ui';
 import { useT } from '@/lib/i18n';
-import { useSession } from '@/lib/session';
+import { RESCUE_IN_APP } from '@/lib/quest/levels';
+import { START_PLACE } from '@/lib/quest/places';
+import { meetHost } from '@/lib/quest/state';
+import { saveWorld, useWorld } from '@/lib/quest/store';
 import { space } from '@/lib/theme';
 
-const BADGE_EMOJI = { firstFind: '🔎', sharpEyes: '👀', allKinds: '🌈', nightOwl: '🌙', pollinatorFriend: '🌼', creekKeeper: '💧', petPal: '🐾', caseClosed: '🕵️', bingo: '🎉' } as const;
+const PARADE = ['armadillo', 'heron', 'bumblebee', 'mockingbird', 'owl', 'cottontail', 'treefrog', 'monarch'];
 
-export default function CritterClubScreen() {
-  const { t, tl } = useT();
-  const { repo } = useSession();
-  const data = useLoad(async (r) => ({ critters: await r.listCritters(), cards: await r.listBingoCards(), cases: await r.listCases(), pets: await r.listPets() }));
-  const game = repo.getGame();
-  if (!data) return <Screen title={t('critters.title')}>{null}</Screen>;
+export default function CritterTitleScreen() {
+  const { t } = useT();
+  const { world, ready } = useWorld();
+  const played = world.visited.length > 1 || world.met.length > 0;
 
-  const points = totalPoints(game, data.critters, data.cards);
-  const rank = rankFor(points);
-  const found = spottedIds(game).size;
-  const badges = earnedBadges(game, data.critters, data.cards);
-  const nextMin = rank.next ? points + rank.next.pointsToGo : points;
+  const start = () => {
+    // The very first time, Dilly at the statue says hello and gives the first quest.
+    if (!world.intro) {
+      saveWorld(meetHost({ ...world, intro: true }, START_PLACE));
+      router.push({ pathname: '/critters/world', params: { open: START_PLACE, hello: '1' } });
+      return;
+    }
+    router.push('/critters/world');
+  };
 
   return (
-    <Screen title={t('critters.title')} subtitle={t('critters.subtitle')}>
-      <Card tone="soft">
-        <Txt variant="label" tone="primary">
-          {t('critters.yourRank')}
-        </Txt>
-        <Txt variant="title">{t(`critters.rank.${rank.id}`)}</Txt>
-        <Txt>{t('critters.points', { points })}</Txt>
-        {rank.next ? (
-          <>
-            <ProgressBar value={points} max={nextMin} label={t('critters.toNext', { points: rank.next.pointsToGo, rank: t(`critters.rank.${rank.next.id}`) })} />
-            <Txt variant="small" tone="secondary">
-              {t('critters.toNext', { points: rank.next.pointsToGo, rank: t(`critters.rank.${rank.next.id}`) })}
-            </Txt>
-          </>
-        ) : null}
-      </Card>
-
-      <View style={{ gap: space.sm }}>
-        <EmojiRow emoji="📖" title={t('critters.guide')} subtitle={t('critters.guideCount', { found, total: data.critters.length })} href="/critters/guide" />
-        <EmojiRow emoji="🐾" title={t('critters.pets')} subtitle={t('critters.petsCount', { met: game.petsMet.length, total: data.pets.length })} href="/critters/pets" />
-        <EmojiRow emoji="🎯" title={t('critters.bingo')} subtitle={t('critters.bingoHint')} href="/critters/bingo" />
-        <EmojiRow emoji="🌎" title={t('critters.tally')} subtitle={t('critters.tallyHint')} href="/critters/tally" />
-        <EmojiRow emoji="🧭" title={t('critters.patterns')} subtitle={t('critters.patternsHint')} href="/critters/patterns" />
+    <Screen title={t('critters.title')} hideTitle>
+      <WoodSign title={t('critters.title')} caption={t('zone.tagline')} />
+      <View accessible accessibilityLabel={t('zone.parade')} style={{ flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'center', gap: 4 }}>
+        {PARADE.map((id) => (
+          <PixelCritter key={id} id={id} size={36} />
+        ))}
       </View>
 
-      <SectionTitle>{t('critters.mysteries')}</SectionTitle>
-      <Txt tone="secondary">{t('critters.mysteriesHint')}</Txt>
-      <View style={{ gap: space.sm }}>
-        {data.cases.map((m) => {
-          const result = game.mysteries[m.id];
-          return (
-            <EmojiRow
-              key={m.id}
-              emoji={result ? (result.solved ? '✅' : '📁') : '🕵️'}
-              title={tl(m.title)}
-              subtitle={result ? (result.solved ? t('critters.caseSolved') : t('critters.caseLearned')) : t('critters.caseOpen')}
-              href={{ pathname: '/critters/case/[id]', params: { id: m.id } }}
-            />
-          );
-        })}
-      </View>
+      <Btn icon={Gamepad2} label={played ? t('zone.continue') : t('zone.start')} onPress={start} disabled={!ready} />
 
-      <SectionTitle>{t('critters.badges')}</SectionTitle>
-      <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: space.sm }}>
-        {BADGES.map((badge) => {
-          const has = badges.has(badge);
-          return (
-            <View
-              key={badge}
-              accessible
-              accessibilityLabel={`${t(`critters.badge.${badge}`)}. ${has ? t('critters.badgeEarned') : t(`critters.badgeHow.${badge}`)}`}
-              style={{ flexBasis: '30%', flexGrow: 1, alignItems: 'center', gap: 4, paddingVertical: space.sm }}>
-              <Emoji size={36} dim={!has}>
-                {BADGE_EMOJI[badge]}
-              </Emoji>
-              <Txt variant="label" style={{ textAlign: 'center' }}>
-                {t(`critters.badge.${badge}`)}
-              </Txt>
-              <Txt variant="small" tone="secondary" style={{ textAlign: 'center' }}>
-                {has ? t('critters.badgeEarned') : t(`critters.badgeHow.${badge}`)}
-              </Txt>
-            </View>
-          );
-        })}
-      </View>
+      <Parchment title={t('zone.storyTitle')}>
+        <Ink>{t('zone.story')}</Ink>
+        {RESCUE_IN_APP ? <Ink>{t('zone.storyRescue')}</Ink> : null}
+      </Parchment>
 
-      <Notice tone="primary" icon={Users} title={t('critters.familyTitle')} body={t('critters.familyBody')} />
-      <EmojiRow emoji="🤝" title={t('critters.rules')} subtitle={t('critters.rulesHint')} href="/critters/rules" />
+      <Parchment title={t('zone.howTitle')}>
+        <Bullets items={[t('zone.how1'), t('zone.how2'), t('zone.how3'), ...(RESCUE_IN_APP ? [t('zone.how4')] : [])]} />
+      </Parchment>
+
+      <CheckRow label={t('zone.sound')} hint={t('zone.soundHint')} checked={world.sound} onChange={(sound) => saveWorld({ ...world, sound })} />
+
+      <Notice tone="primary" icon={HandHeart} title={t('zone.familyTitle')} body={t('zone.familyBody')} />
+      <RowLink icon={List} title={t('zone.listInstead')} onPress={() => router.push('/critters/more')} />
+      <RowLink icon={Home} title={t('menu.leave')} onPress={() => router.replace('/')} />
       <View style={{ flexDirection: 'row', gap: space.sm, alignItems: 'center' }}>
         <Tag tone="draft" label={t('common.draft')} />
         <Txt variant="small" tone="secondary" style={{ flex: 1 }}>

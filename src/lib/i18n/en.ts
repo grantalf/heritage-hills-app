@@ -1,4 +1,5 @@
 import { rescueEn } from './rescue.en';
+import { questEn } from './quest.en';
 import { workshopEn } from './workshop.en';
 
 /**
@@ -8,6 +9,7 @@ import { workshopEn } from './workshop.en';
 export const en = {
   ...workshopEn,
   ...rescueEn,
+  ...questEn,
   'draft.banner': 'First draft · Sample data · Nothing is sent',
 
   'common.back': 'Back',

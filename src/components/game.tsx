@@ -1,9 +1,10 @@
 import { router, type Href } from 'expo-router';
 import { ChevronLeft, ChevronRight } from 'lucide-react-native';
-import type { ReactNode } from 'react';
+import { createContext, useContext, type ReactNode } from 'react';
 import { I18nManager, Pressable, Text, View } from 'react-native';
 
 import { CritterArt, type ArtSpec } from '@/components/critter-art';
+import { hasPixelCritter, PixelCritter } from '@/components/quest/pixel-critter';
 import { Txt, useUI } from '@/components/ui';
 import { critterArt, petArt } from '@/lib/data/game-art';
 import { radius, space } from '@/lib/theme';
@@ -22,8 +23,16 @@ export function Emoji({ children, size = 32, dim }: { children: string; size?: n
   );
 }
 
-/** The cartoon character for an animal or pet, or its emoji if it has none yet. */
+/** Inside the Critter Club game zone, animals are drawn as pixel critters (block 3). */
+export const PixelMode = createContext(false);
+
+/** The cartoon character for an animal or pet, or its emoji if it has none yet. In the game zone, its pixel critter. */
 export function CritterPic({ id, art, emoji, size = 48, dim }: { id?: string; art?: ArtSpec; emoji: string; size?: number; dim?: boolean }) {
+  const pixel = useContext(PixelMode);
+  if (pixel && id && !art && hasPixelCritter(id)) {
+    const step = Math.max(1, Math.floor(size / 36));
+    return <PixelCritter id={id} size={36 * step} shadow={dim} />;
+  }
   const spec = art ?? (id ? (critterArt[id] ?? petArt[id]) : undefined);
   if (spec) return <CritterArt spec={spec} size={size} dim={dim} />;
   return (
@@ -42,6 +51,7 @@ export function EmojiRow({
   href,
   right,
   dim,
+  onPress,
 }: {
   emoji: string;
   picId?: string;
@@ -51,6 +61,8 @@ export function EmojiRow({
   href: Href;
   right?: ReactNode;
   dim?: boolean;
+  /** Called with href instead of plain navigation, when the screen needs to tidy up first. */
+  onPress?: (href: Href) => void;
 }) {
   const { c, round } = useUI();
   const Chevron = I18nManager.isRTL ? ChevronLeft : ChevronRight;
@@ -58,7 +70,7 @@ export function EmojiRow({
     <Pressable
       accessibilityRole="button"
       accessibilityLabel={subtitle ? `${title}. ${subtitle}` : title}
-      onPress={() => router.push(href)}
+      onPress={() => (onPress ? onPress(href) : router.push(href))}
       style={({ pressed }) => ({
         flexDirection: 'row',
         alignItems: 'center',
