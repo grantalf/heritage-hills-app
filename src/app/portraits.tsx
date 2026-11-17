@@ -15,6 +15,7 @@ import { longDay, shortDay } from '@/lib/dates';
 import { useT } from '@/lib/i18n';
 import { nextBatchDay, outbound, PHOTO_CHECKS, PORTRAIT, SEND_BACK_REASONS, type PhotoCheck, type PortraitRequest } from '@/lib/petcards';
 import { useSession } from '@/lib/session';
+import { stripPhoto } from '@/lib/strip-photo';
 import { MIN_TOUCH, space } from '@/lib/theme';
 
 const dollars = (cents: number) => '$' + (cents / 100).toFixed(2);
@@ -111,9 +112,10 @@ function RequestCard({ request, triesLeft, date, onDone }: { request: PortraitRe
   const upload = async () => {
     try {
       const picked = await ImagePicker.launchImageLibraryAsync({ mediaTypes: ['images'], quality: 0.9, exif: false });
-      if (!picked.canceled && picked.assets[0]) await finish(picked.assets[0].uri);
+      // The finished portrait is drawn again too, so no hidden details ride along (block 5 review).
+      if (!picked.canceled && picked.assets[0]) await finish(await stripPhoto(picked.assets[0].uri));
     } catch {
-      // Nothing to do: the request stays open.
+      // Nothing to do: the request stays open. If cleaning fails, nothing is uploaded.
     }
   };
   const stepButton = (delta: number) => {
@@ -138,7 +140,7 @@ function RequestCard({ request, triesLeft, date, onDone }: { request: PortraitRe
     <Card>
       <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 6, alignItems: 'center' }}>
         <Txt variant="lead" style={{ flexShrink: 1 }}>
-          {t('maker.requestOf', { kind, name: request.petName })}
+          {t('maker.requestOf', { kind, code: out.fileName.slice(9, 15) })}
         </Txt>
         {request.redo ? <Tag tone="notice" label={t('cards.requestAgain')} /> : null}
         {request.sample ? <SampleTag /> : null}

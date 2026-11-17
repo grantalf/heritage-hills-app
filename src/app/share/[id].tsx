@@ -1,5 +1,5 @@
 import { router, useLocalSearchParams } from 'expo-router';
-import { Check, Clock, Flag, HandHeart, ShieldAlert, Trash2, Wrench } from 'lucide-react-native';
+import { Check, Clock, Flag, HandHeart, Lock, LogIn, ShieldAlert, Trash2, Wrench } from 'lucide-react-native';
 import { View } from 'react-native';
 
 import { Btn, Card, EmptyState, Notice, SampleTag, Screen, Tag, Txt } from '@/components/ui';
@@ -10,12 +10,23 @@ import { useSession } from '@/lib/session';
 export default function ShareItemScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const { t, tl } = useT();
-  const { repo, needNeighbor } = useSession();
+  const { repo, needNeighbor, isNeighbor } = useSession();
   const result = useLoad(async (r) => ({ item: await r.getShareItem(id) }), id);
   const item = result?.item;
 
   if (!item) {
-    return <Screen title={t('share.title')}>{result ? <EmptyState icon={Wrench} title={t('share.notFound')} /> : null}</Screen>;
+    // After a report hides the item, the reporter still sees the thank-you instead of "not found".
+    const body = !isNeighbor ? (
+      <>
+        <EmptyState icon={Lock} title={t('share.neighborsOnly')} body={t('share.neighborsOnlyHint')} />
+        <Btn icon={LogIn} label={t('signIn.start')} onPress={() => router.push('/sign-in')} />
+      </>
+    ) : repo.hasReported(id) ? (
+      <Notice announce tone="good" icon={Check} title={t('share.reportedTitle')} body={t('share.reportedBody')} />
+    ) : (
+      <EmptyState icon={Wrench} title={t('share.notFound')} />
+    );
+    return <Screen title={t('share.title')}>{result ? body : null}</Screen>;
   }
   const request = repo.getShareRequest(item.id);
   const reported = repo.hasReported(item.id);
@@ -38,7 +49,7 @@ export default function ShareItemScreen() {
       {item.category === 'tool' ? <Notice tone="notice" icon={ShieldAlert} title={t('share.toolSafetyTitle')} body={t('share.toolSafetyBody')} /> : null}
 
       {reported ? (
-        <Notice tone="good" icon={Check} title={t('share.reportedTitle')} body={t('share.reportedBody')} />
+        <Notice announce tone="good" icon={Check} title={t('share.reportedTitle')} body={t('share.reportedBody')} />
       ) : item.mine ? (
         <Btn
           kind="danger"
@@ -56,12 +67,12 @@ export default function ShareItemScreen() {
           ) : null}
           {request === 'none' && item.status === 'lent' ? <Notice tone="notice" icon={Clock} title={t('share.lentTitle')} body={t('share.lentBody')} /> : null}
           {request === 'sent' ? (
-            <Notice tone="notice" icon={Clock} title={t('share.sentTitle')} body={t('share.sentBody')}>
+            <Notice announce tone="notice" icon={Clock} title={t('share.sentTitle')} body={t('share.sentBody')}>
               <Btn kind="quiet" label={t('share.cancel')} onPress={() => void repo.cancelShareRequest(item.id)} />
             </Notice>
           ) : null}
           {request === 'accepted' ? (
-            <Notice tone="good" icon={Check} title={t('share.acceptedTitle')} body={t('share.acceptedBody')}>
+            <Notice announce tone="good" icon={Check} title={t('share.acceptedTitle')} body={t('share.acceptedBody')}>
               <Btn kind="quiet" label={t('share.cancel')} onPress={() => void repo.cancelShareRequest(item.id)} />
             </Notice>
           ) : null}

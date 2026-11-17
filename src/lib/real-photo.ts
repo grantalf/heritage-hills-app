@@ -50,13 +50,27 @@ export function pickPhoto(json: unknown, scientificName: string): RealPhoto | un
 }
 
 const cache = new Map<string, RealPhoto | null>();
+/** After a failed request, wait before asking again, to be polite to the photo site (block 5 review, S-23). */
+const RETRY_AFTER_MS = 5 * 60_000;
+const failedAt = new Map<string, number>();
 
 /** Returns a photo, null when none can be shown, and throws when the network fails. */
 export async function loadRealPhoto(scientificName: string): Promise<RealPhoto | null> {
   const hit = cache.get(scientificName);
   if (hit !== undefined) return hit;
-  const response = await fetch(realPhotoApiUrl(scientificName), { headers: { Accept: 'application/json' } });
-  if (!response.ok) throw new Error('photo service answered ' + response.status);
+  const failed = failedAt.get(scientificName);
+  if (failed !== undefined && Date.now() - failed < RETRY_AFTER_MS) throw new Error('photo service failed recently; try again later');
+  let response: Response;
+  try {
+    response = await fetch(realPhotoApiUrl(scientificName), { headers: { Accept: 'application/json' } });
+  } catch (e) {
+    failedAt.set(scientificName, Date.now());
+    throw e;
+  }
+  if (!response.ok) {
+    failedAt.set(scientificName, Date.now());
+    throw new Error('photo service answered ' + response.status);
+  }
   const found = pickPhoto(await response.json(), scientificName) ?? null;
   cache.set(scientificName, found);
   return found;

@@ -6,8 +6,9 @@
 import type { ReactNode } from 'react';
 import { View } from 'react-native';
 
-import { Txt } from '@/components/ui';
+import { Txt, UIOverrideProvider } from '@/components/ui';
 import { MENU } from '@/lib/arcade/menu-colors';
+import { ZONE, ZONE_ROUNDNESS } from '@/lib/quest/palette';
 import { space } from '@/lib/theme';
 
 /** The title sign: two planks on two posts. The words are real text. */
@@ -48,9 +49,18 @@ export function Parchment({ children, title }: { children: ReactNode; title?: st
           </Txt>
         </View>
       ) : null}
-      <View style={{ padding: space.md, gap: space.sm }}>{children}</View>
+      {/* Buttons and text inside parchment use the zone's tested colors, so they stay readable in dark mode (block 5 review, A-02). */}
+      <ParchmentColors>
+        <View style={{ padding: space.md, gap: space.sm }}>{children}</View>
+      </ParchmentColors>
     </View>
   );
+}
+
+const PARCHMENT_UI = { palette: ZONE, roundness: ZONE_ROUNDNESS };
+/** Wraps anything drawn on parchment, so the app's light or dark colors never land on it. */
+export function ParchmentColors({ children }: { children: ReactNode }) {
+  return <UIOverrideProvider value={PARCHMENT_UI}>{children}</UIOverrideProvider>;
 }
 
 /** Text on parchment, in the menu ink color. */

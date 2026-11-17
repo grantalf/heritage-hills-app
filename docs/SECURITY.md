@@ -155,6 +155,10 @@ If only one eligible person exists, the action is blocked and the app says so. T
 ### Outside services the app contacts
 By default: none. One exception, and only when the person asks: tapping "Show a real photo" on an animal page makes the phone request one photo from iNaturalist (`api.inaturalist.org` for the lookup, its photo storage for the image). That site sees what any website sees (network address, device type) and which species was asked for. It receives nothing about the person, their account or their sightings. The button says so before it is tapped. The app shows a photo only from an expected https address and only with a sharing license and a credit (D-054). List this in the privacy policy.
 
+**Used by a person, not by the app: the portrait maker's picture service (D-059, D-B4-08).** When a family asks for a pet portrait and agrees on the agreement screen, a person in the portrait maker role (a board-approved volunteer) sends that one photo and the kind of animal to an outside image service, under a random file name. No pet name, family name, street or account goes with it. The app itself never contacts the service. No service is chosen yet: `PORTRAIT_SERVICE.approved` in `src/lib/petcards.ts` stays false until the board approves one in writing. Before approving, check on the provider's own terms page that the plan used does not train on uploads, and how long it keeps them. The family's photo is deleted from our side when the request ends or after 30 days. List the chosen service by name in the privacy policy and on the agreement screen.
+
+**Not an outside service:** game sounds and pixel art are made by code inside the app. Skin packs (holiday swaps) are part of the app's code and never load anything from the internet.
+
 ## 11. Before any real data is collected
 - [ ] Attorney review of privacy policy, terms and guidelines
 - [ ] Access-rule tests pass for every table

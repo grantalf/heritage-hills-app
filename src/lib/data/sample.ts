@@ -13,6 +13,7 @@ import type { ArtSpec } from '@/components/critter-art';
 
 import { addObservation, emptyObservations, sampleObservations } from '../patterns';
 import type { GameState, Pet, PetKind, Zone } from './game-types';
+import { petTextProblems, shareTextProblems } from '../petcards';
 import { emptyPetCards, PetCardStore, type PetCardState } from './petcard-sample';
 import type { AlertDraft, FlowersState, PendingAlert, Repository, RsvpAnswer } from './repository';
 import type {
@@ -200,15 +201,20 @@ export class SampleRepository implements Repository {
   }
 
   // ---- Share shelf ----
+  // The share shelf is for verified neighbors only (SECURITY.md). A hidden item is hidden by link too (block 5 review, S-07, S-08).
   async listShareItems() {
+    if (this.state.role === 'visitor') return [];
     return [...this.state.myItems, ...content.shareItems].filter(
       (item) => item.mine || !isHiddenByReports(item.id, this.state.reports),
     );
   }
   async getShareItem(id: string) {
-    return [...this.state.myItems, ...content.shareItems].find((i) => i.id === id);
+    if (this.state.role === 'visitor') return undefined;
+    return [...this.state.myItems, ...content.shareItems].find((i) => i.id === id && (i.mine || !isHiddenByReports(i.id, this.state.reports)));
   }
   addShareItem(input: { category: ShareCategory; title: string; condition: string }) {
+    // Words neighbors will read are checked here too, not only on the form (block 5 review, S-02).
+    if (shareTextProblems(input).length > 0) return Promise.reject(new Error('share text failed the word check'));
     const item: ShareItem = {
       id: 'mine-' + Date.now().toString(36),
       category: input.category,
@@ -324,8 +330,9 @@ export class SampleRepository implements Repository {
     return this.commit({ ...this.state, consent: [...this.state.consent, row] });
   }
   async exportMyData() {
-    const { role, postedAlerts: _posted, pendingAlert: _pending, ...mine } = this.state;
-    return { accessLevel: role, ...mine };
+    // Only this person's own things: other people's ids and the simulated second report stay out.
+    const { role, postedAlerts: _posted, pendingAlert: _pending, petCards: _cards, reports, ...mine } = this.state;
+    return { accessLevel: role, ...mine, reports: reports.filter((r) => r.reporterId === ME).map((r) => ({ itemId: r.itemId })), petCards: this.cards.exportView() };
   }
   deleteMyData() {
     this.photos.clear();
@@ -372,6 +379,7 @@ export class SampleRepository implements Repository {
     return this.visiblePets().find((p) => p.id === id);
   }
   async addPet(input: { name: string; kind: PetKind; about: string; hello: string; art?: ArtSpec }) {
+    if (petTextProblems(input).length > 0) throw new Error('pet text failed the word check');
     const same = { en: '', es: '' };
     const pet: Pet = {
       id: 'mypet-' + Date.now().toString(36),

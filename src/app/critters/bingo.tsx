@@ -24,7 +24,7 @@ export default function BingoScreen() {
     <Screen title={tl(card.title)} subtitle={t('critters.bingoSubtitle')}>
       {lines > 0 ? <Notice tone="good" icon={PartyPopper} title={t('critters.bingoLine', { count: lines })} body={t('critters.bingoKeepGoing')} /> : null}
       <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: space.sm }}>
-        {card.squares.map((square) => {
+        {card.squares.map((square, i) => {
           const on = marked.includes(square.id);
           return (
             <Pressable
@@ -32,7 +32,8 @@ export default function BingoScreen() {
               accessibilityRole="checkbox"
               accessibilityState={{ checked: on }}
               aria-checked={on}
-              accessibilityLabel={tl(square.text)}
+              // Row and column, so a screen reader user can aim for three in a row (block 5 review, A-13).
+              accessibilityLabel={t('critters.bingoSquare', { row: Math.floor(i / 3) + 1, col: (i % 3) + 1, text: tl(square.text) })}
               onPress={() => void repo.toggleBingo(card.id, square.id)}
               style={({ pressed }) => ({
                 flexBasis: '30%',

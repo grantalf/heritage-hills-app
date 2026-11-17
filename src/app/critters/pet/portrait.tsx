@@ -14,7 +14,7 @@ import { Ink, Parchment } from '@/components/arcade/menu';
 import { Bullets, Btn, CheckRow, Choices, EmptyState, Notice, Screen, SectionTitle, Txt } from '@/components/ui';
 import { useLoad } from '@/lib/data/provider';
 import { useT } from '@/lib/i18n';
-import { PORTRAIT_SERVICE, type PhotoAudience, type PortraitRequest } from '@/lib/petcards';
+import { canChangePhoto, PORTRAIT_SERVICE, type PhotoAudience, type PortraitRequest } from '@/lib/petcards';
 import { stripPhoto } from '@/lib/strip-photo';
 import { useSession } from '@/lib/session';
 import { space } from '@/lib/theme';
@@ -37,6 +37,8 @@ export default function PortraitScreen() {
   const photo = repo.cards.getPhoto(pet.id);
   const request = repo.cards.getRequest(pet.id);
   const open = request && (request.status === 'waiting' || request.status === 'photoOk' || request.status === 'sentBack');
+  // The photo the portrait maker checks is the photo that goes out (block 5 review).
+  const photoLocked = !canChangePhoto(request);
   const problems = repo.cards.requestProblems(pet.id, agreed).filter((p) => p !== 'notAgreed' && p !== 'noPhoto');
   const service = PORTRAIT_SERVICE.name ?? t('cards.serviceNone');
 
@@ -64,8 +66,9 @@ export default function PortraitScreen() {
       <SectionTitle>{t('cards.realPhoto')}</SectionTitle>
       {photo ? <Image source={{ uri: photo }} accessibilityLabel={t('cards.photoAlt', { name: pet.name })} style={{ width: '100%', height: 240, borderRadius: 6 }} resizeMode="cover" /> : null}
       <Txt>{t('cards.photoRules')}</Txt>
-      {Platform.OS !== 'web' ? <Btn kind="secondary" icon={Camera} label={t('cards.photoTake')} onPress={() => void pick(true)} /> : null}
-      <Btn kind="secondary" icon={ImagePlus} label={photo ? t('cards.photoChange') : t('cards.photoAdd')} onPress={() => void pick(false)} />
+      {photoLocked ? <Txt variant="small" tone="secondary">{t('cards.photoLocked')}</Txt> : null}
+      {Platform.OS !== 'web' && !photoLocked ? <Btn kind="secondary" icon={Camera} label={t('cards.photoTake')} onPress={() => void pick(true)} /> : null}
+      {!photoLocked ? <Btn kind="secondary" icon={ImagePlus} label={photo ? t('cards.photoChange') : t('cards.photoAdd')} onPress={() => void pick(false)} /> : null}
       {photo && !open ? <Btn kind="danger" icon={Trash2} label={t('cards.photoRemove')} onPress={() => repo.cards.setPhoto(pet.id, undefined)} /> : null}
       {problem ? <Txt tone="urgent">{t('cards.photoProblem')}</Txt> : null}
       <Txt variant="small" tone="secondary">

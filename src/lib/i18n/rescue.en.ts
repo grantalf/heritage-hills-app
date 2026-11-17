@@ -4,6 +4,8 @@
  * The status line during play reuses the `street.status.*` lines from workshop.en.ts.
  */
 export const rescueEn = {
+  'rescue.stampEarned': 'rescued',
+  'rescue.stampNotYet': 'not yet',
   'rescue.title': 'Critter Rescue',
   'rescue.subtitle': 'A short arcade game. Bonk the monsters and free the critters.',
   'rescue.sign': 'Critter Rescue',

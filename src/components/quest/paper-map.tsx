@@ -235,8 +235,9 @@ function Marker({ place, x, y, info, here, onPress, scale }: { place: Place; x: 
           alignItems: 'center',
           justifyContent: 'center',
           backgroundColor: spooky ? ZONE_EXTRA.spooky : PAPER.paperLight,
-          borderWidth: here ? 4 : 2.5,
-          borderColor: here ? ZONE_EXTRA.gold : PAPER.ink,
+          // "You are here" is a thicker dark ring: gold on paper was too faint (block 5 review, A-08).
+          borderWidth: here ? 5 : 2.5,
+          borderColor: PAPER.ink,
           transform: [{ scale: pressed ? 0.92 : 1 }],
         })}>
         {place.host ? (

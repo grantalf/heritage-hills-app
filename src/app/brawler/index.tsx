@@ -15,7 +15,7 @@ import { useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore
 import { AppState, Platform, Pressable, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { Ink, Parchment, WoodSign } from '@/components/arcade/menu';
+import { Ink, Parchment, ParchmentColors, WoodSign } from '@/components/arcade/menu';
 import { ScoreBar } from '@/components/arcade/hud';
 import { Pad } from '@/components/arcade/pad';
 import { createSfx } from '@/components/arcade/sfx';
@@ -284,18 +284,25 @@ function CastPic({ sheet }: { sheet: string }) {
 }
 
 function Stamp({ sheet, name, earned }: { sheet?: string; name: string; earned: boolean }) {
+  const { t } = useT();
   const meta = sheet ? sheetMeta(sheet) : undefined;
+  // Words, not a check mark, and full-strength text: only the picture is faded (block 5 review, A-09, A-20).
+  const state = earned ? t('rescue.stampEarned') : t('rescue.stampNotYet');
   return (
     <View
       accessible
-      accessibilityLabel={`${name}: ${earned ? '✓' : '—'}`}
-      style={{ width: 96, alignItems: 'center', padding: 4, borderRadius: 8, borderWidth: 2, borderStyle: earned ? 'solid' : 'dashed', borderColor: earned ? MENU.teal : MENU.inkSoft, opacity: earned ? 1 : 0.6 }}>
-      {sheet && meta ? <Crop sheet={sheet} anim="cheer" scale={2} width={84} height={56} /> : null}
+      accessibilityLabel={`${name}: ${state}`}
+      style={{ width: 96, alignItems: 'center', padding: 4, borderRadius: 8, borderWidth: 2, borderStyle: earned ? 'solid' : 'dashed', borderColor: earned ? MENU.teal : MENU.inkSoft }}>
+      {sheet && meta ? (
+        <View style={{ opacity: earned ? 1 : 0.5 }}>
+          <Crop sheet={sheet} anim="cheer" scale={2} width={84} height={56} />
+        </View>
+      ) : null}
       <Txt variant="small" style={{ color: MENU.ink, textAlign: 'center' }}>
         {name}
       </Txt>
       <Txt variant="label" style={{ color: earned ? MENU.ink : MENU.inkSoft, textAlign: 'center' }}>
-        {earned ? '✓' : '—'}
+        {earned ? '✓ ' + state : state}
       </Txt>
     </View>
   );
@@ -466,6 +473,7 @@ function PlayView({
           ) : null}
           {overlay ? (
             <View style={{ position: 'absolute', top: 0, left: 0, right: 0, height: VIEW_H * scale, backgroundColor: 'rgba(30,18,10,0.72)', alignItems: 'center', justifyContent: 'center', padding: space.md }}>
+              <ParchmentColors>
               <View style={{ backgroundColor: MENU.parchment, borderColor: MENU.wood, borderWidth: 4, borderRadius: 12, padding: space.md, gap: space.sm, width: '100%', maxWidth: 340 }}>
                 {lost ? (
                   <>
@@ -483,6 +491,7 @@ function PlayView({
                   </>
                 )}
               </View>
+              </ParchmentColors>
             </View>
           ) : null}
         </View>

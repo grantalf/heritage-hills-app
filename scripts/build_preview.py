@@ -6,6 +6,8 @@ Usage:
 The start page defaults to Home ("/"). Example: /brawler opens Critter Rescue.
 """
 import glob
+import html
+import re
 import os
 import sys
 
@@ -17,14 +19,14 @@ if not start.startswith("/") or any(ch in start for ch in "\"'<>"):
 bundles = glob.glob(os.path.join(src, "_expo/static/js/web/*.js"))
 if len(bundles) != 1:
     sys.exit(f"expected exactly one bundle, found {len(bundles)}; export with EXPO_NO_BUNDLE_SPLITTING=1")
-js = open(bundles[0], encoding="utf8").read().replace("</script", "<\\/script")
+js = re.sub(r"</(script)", r"<\\/\1", open(bundles[0], encoding="utf8").read(), flags=re.I)
 
 html = f"""<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>{title}</title>
+<title>{html.escape(title)}</title>
 <style>
   html, body {{ height: 100%; margin: 0; }}
   body {{ overflow: hidden; background: #ffffff; }}

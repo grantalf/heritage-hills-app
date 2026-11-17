@@ -5,6 +5,7 @@ import { useState } from 'react';
 import { ALERT_ICON } from '@/components/icons';
 import { Btn, Card, Choices, EmptyState, Field, Notice, Screen, SectionTitle, Txt } from '@/components/ui';
 import type { AlertKind } from '@/lib/data/types';
+import { DEMO } from '@/lib/demo';
 import { useT } from '@/lib/i18n';
 import { useSession } from '@/lib/session';
 
@@ -33,7 +34,7 @@ export default function BoardScreen() {
       <Notice tone="primary" icon={Users} title={t('board.twoTitle')} body={t('board.twoBody')} />
 
       {message === 'sent' ? (
-        <Notice tone="good" icon={BadgeCheck} title={t('board.sentTitle')} body={t('board.sentBody')}>
+        <Notice announce tone="good" icon={BadgeCheck} title={t('board.sentTitle')} body={t('board.sentBody')}>
           <Btn kind="secondary" label={t('alerts.title')} onPress={() => router.push('/alerts')} />
         </Notice>
       ) : null}
@@ -42,25 +43,28 @@ export default function BoardScreen() {
         <>
           <SectionTitle>{t('board.waitingTitle')}</SectionTitle>
           <Notice tone={pending.draft.kind} icon={ALERT_ICON[pending.draft.kind]} title={pending.draft.title.en} body={pending.draft.body.en} />
-          {message === 'samePerson' ? <Notice tone="urgent" icon={TriangleAlert} title={t('board.sameTitle')} body={t('board.sameBody')} /> : null}
+          {message === 'samePerson' ? <Notice announce tone="urgent" icon={TriangleAlert} title={t('board.sameTitle')} body={t('board.sameBody')} /> : null}
           <Btn
             kind="secondary"
             label={t('board.confirmSelf')}
             onPress={() => void repo.approvePendingAlert(false).then((ok) => setMessage(ok ? 'sent' : 'samePerson'))}
           />
-          <Btn
-            icon={BadgeCheck}
-            label={t('board.confirmOther')}
-            onPress={() =>
-              void repo.approvePendingAlert(true).then((ok) => {
-                if (ok) {
-                  setMessage('sent');
-                  setTitle('');
-                  setBody('');
-                }
-              })
-            }
-          />
+          {/* A pretend second officer, for the draft only. The real server checks the second person (B-4). */}
+          {DEMO ? (
+            <Btn
+              icon={BadgeCheck}
+              label={t('board.confirmOther')}
+              onPress={() =>
+                void repo.approvePendingAlert(true).then((ok) => {
+                  if (ok) {
+                    setMessage('sent');
+                    setTitle('');
+                    setBody('');
+                  }
+                })
+              }
+            />
+          ) : null}
           <Btn
             kind="quiet"
             label={t('board.cancelDraft')}

@@ -6,18 +6,35 @@
  * Left half: touch and slide to move. Right half: touch to bonk.
  */
 import { Move, Star } from 'lucide-react-native';
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { View, type GestureResponderEvent, type ViewStyle } from 'react-native';
 
 import { Txt, useUI } from '@/components/ui';
+import { useT } from '@/lib/i18n';
 
 const HEIGHT = 190;
 /** Stops the browser from selecting text or scrolling while a thumb is on the controls. */
 const NO_SELECT = { userSelect: 'none', touchAction: 'none' } as ViewStyle;
 const DEAD = 12;
+/** How long one screen-reader or switch action holds a direction or the bonk button. */
+const PULSE_MS = 280;
+type PadAction = 'forward' | 'back' | 'up' | 'down' | 'bonk';
+const PULSES: Record<PadAction, [number, number, boolean]> = { forward: [1, 0, false], back: [-1, 0, false], up: [0, -1, false], down: [0, 1, false], bonk: [0, 0, true] };
 
 export function Pad({ onInput, moveLabel, bonkLabel, label, disabled }: { onInput: (x: number, z: number, bonk: boolean) => void; moveLabel: string; bonkLabel: string; label: string; disabled?: boolean }) {
   const { c } = useUI();
+  const { t } = useT();
+  const pulse = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
+  useEffect(() => () => clearTimeout(pulse.current), []);
+  // Screen readers and switch controls cannot slide a thumb, so the surface also offers named actions:
+  // each one holds a direction or the bonk button for a moment (WCAG 2.1.1, 2.5.1; block 5 review).
+  const act = (name: string) => {
+    const p = PULSES[name as PadAction];
+    if (!p || disabled) return;
+    clearTimeout(pulse.current);
+    onInput(p[0], p[1], p[2]);
+    pulse.current = setTimeout(() => onInput(0, 0, false), PULSE_MS);
+  };
   const box = useRef({ x: 0, y: 0, w: 320, h: HEIGHT });
   const [show, setShow] = useState({ dx: 0, dy: 0, bonk: false });
 
@@ -60,6 +77,10 @@ export function Pad({ onInput, moveLabel, bonkLabel, label, disabled }: { onInpu
       }}
       accessible
       accessibilityLabel={label}
+      accessibilityHint={t('street.padHint')}
+      accessibilityState={{ disabled: !!disabled }}
+      accessibilityActions={(Object.keys(PULSES) as PadAction[]).map((name) => ({ name, label: t(`street.pad.${name}`) }))}
+      onAccessibilityAction={(e) => act(e.nativeEvent.actionName)}
       onStartShouldSetResponder={() => !disabled}
       onMoveShouldSetResponder={() => !disabled}
       onResponderTerminationRequest={() => false}

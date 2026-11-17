@@ -83,30 +83,100 @@ export function toggleFavorite(current: readonly FavoriteId[], id: FavoriteId): 
 
 export type TextProblem = 'tooShort' | 'tooLong' | 'link' | 'email' | 'phone' | 'address';
 
-const LINK = /(https?:\/\/|www\.|\b[a-z0-9-]+\.(com|org|net|io|co|me|ly|app|info)\b)/i;
+const TLDS = 'com|org|net|io|co|me|ly|app|info|us|xyz|gg|photos|pics|pet|pets|tv|biz|edu|gov|link|site|online|store|page|dev|mx|social|club';
+const LINK = new RegExp(`(https?:\\/\\/|www\\.|\\b[a-z0-9-]+\\.(${TLDS})\\b|\\b\\d{1,3}(\\.\\d{1,3}){3}\\b)`, 'i');
 const EMAIL = /[^\s@]+@[^\s@]+\.[a-z]{2,}/i;
+/** A social media name such as @biscuit_the_dog. Treated like a link. */
+const HANDLE = /(^|[\s(])@[a-z0-9_.]{3,}/i;
 /** Seven or more digits, allowing spaces, dots, dashes and brackets between them. */
 const PHONE = /(\d[\s().-]*){7,}/;
 /** A number followed by a street word, in English or Spanish, or the word first as Spanish writes it. */
 const STREET_WORDS = 'drive|dr|lane|ln|street|st|trail|trl|court|ct|cove|cv|circle|cir|path|road|rd|avenue|ave|boulevard|blvd|way|calle|avenida|camino';
-const ADDRESS = new RegExp(`(\\b\\d{2,5}\\s+([a-záéíóúñ]+\\s+){0,2}(${STREET_WORDS})\\b)|(\\b(calle|avenida|camino)\\s+([a-záéíóúñ]+\\s+){0,2}\\d{2,5}\\b)`, 'i');
+/**
+ * The neighborhood's own streets (from the storybook map, src/lib/quest/map.ts, plus the southern edge).
+ * `alone: true` names are rare words, so they are caught even with no number or street word.
+ */
+export const STREET_NAMES: { name: string; alone: boolean }[] = [
+  { name: 'hermitage', alone: true }, { name: 'furness', alone: true }, { name: 'loralinda', alone: true }, { name: 'durham', alone: true },
+  { name: 'danville', alone: true }, { name: 'weeping willow', alone: false }, { name: 'wisteria', alone: false }, { name: 'bridgetown', alone: true },
+  { name: 'brettonwoods', alone: true }, { name: 'chantilly', alone: true }, { name: 'shenandoah', alone: true }, { name: 'pepperell', alone: true },
+  { name: 'potomac', alone: true }, { name: 'grayledge', alone: true }, { name: 'valley forge', alone: false }, { name: 'tecumseh', alone: true },
+  { name: 'rutherford', alone: true },
+];
+const NAMES = STREET_NAMES.map((n) => n.name.replace(' ', '\\s+')).join('|');
+const ALONE = STREET_NAMES.filter((n) => n.alone).map((n) => n.name).join('|');
+const ADDRESS = new RegExp(
+  [
+    `\\b\\d{1,6}\\s+([a-záéíóúñ]+\\s+){0,2}(${STREET_WORDS})\\b`,
+    `\\b(calle|avenida|camino)\\s+([a-záéíóúñ]+\\s+){0,2}\\d{1,6}\\b`,
+    `\\b\\d{1,6}\\s+(${NAMES})\\b`,
+    `\\b(${NAMES})\\s+((n[uú]mero|no\\.?|#)\\s*)?\\d{1,6}\\b`,
+    `\\b(${NAMES})\\s+(${STREET_WORDS})\\b`,
+    `\\b(${ALONE})\\b`,
+  ].join('|'),
+  'i',
+);
+
+const ZERO_WIDTH = /[­​-‏⁠﻿]/g;
+/** Latin letters that other alphabets draw the same way, used to hide links. */
+const LOOK_ALIKES: Record<string, string> = { а: 'a', е: 'e', о: 'o', р: 'p', с: 'c', у: 'y', х: 'x', і: 'i', ј: 'j', ѕ: 's', ԁ: 'd', ο: 'o', α: 'a', ρ: 'p' };
+const DIGIT_WORDS: Record<string, string> = {
+  zero: '0', one: '1', two: '2', three: '3', four: '4', five: '5', six: '6', seven: '7', eight: '8', nine: '9',
+  cero: '0', uno: '1', dos: '2', tres: '3', cuatro: '4', cinco: '5', seis: '6', siete: '7', ocho: '8', nueve: '9',
+};
+const DIGIT_WORD = new RegExp(`\\b(${Object.keys(DIGIT_WORDS).join('|')})\\b`, 'gi');
+
+/**
+ * Undoes the usual tricks for slipping contact details past a check: odd
+ * Unicode, invisible characters, look-alike letters, other digit sets,
+ * numbers written as words, "at" and "dot" spelled out, and spaces around
+ * @ and dots (block 5 review, S-04). Used only for checking; the person's
+ * words are saved as they wrote them.
+ */
+export function normalizeForCheck(text: string): string {
+  let v = text.normalize('NFKC').replace(ZERO_WIDTH, '');
+  v = v.replace(/[٠-٩]/g, (d) => String(d.charCodeAt(0) - 0x0660)).replace(/[۰-۹]/g, (d) => String(d.charCodeAt(0) - 0x06f0));
+  v = [...v].map((ch) => LOOK_ALIKES[ch] ?? ch).join('');
+  v = v.replace(DIGIT_WORD, (w) => DIGIT_WORDS[w.toLowerCase()]);
+  // The letter O between digits, as in 512-555-O147.
+  v = v.replace(/(?<=\d[\s().-]*)[oO](?=[\s().-]*\d)/g, '0');
+  v = v.replace(/\s*[([{]\s*(at|arroba)\s*[)\]}]\s*/gi, '@').replace(/\s*[([{]\s*(dot|punto)\s*[)\]}]\s*/gi, '.');
+  v = v.replace(/\s+(at|arroba)\s+(?=[a-z0-9-]+\s*(\.|\bdot\b|\bpunto\b))/gi, '@');
+  v = v.replace(new RegExp(`\\s+(dot|punto)\\s+(?=(${TLDS})\\b)`, 'gi'), '.');
+  v = v.replace(/\s*@\s*(?=[a-z0-9])/gi, (m) => (m.trimStart() === m ? m : '@'));
+  v = v.replace(new RegExp(`\\s*\\.\\s*(?=(${TLDS})\\b)`, 'gi'), '.');
+  return v;
+}
 
 /**
  * Checks words before they can be shown to neighbors. It keeps out the things
- * that put people or animals at risk: links, ways to contact someone, and
- * anything that looks like an address. Kindness is checked by people: the
- * pet's family approves notes, and anyone can report.
+ * that put people or animals at risk: links and social media names, ways to
+ * contact someone, and anything that looks like an address or names one of
+ * our streets. Kindness is checked by people: the pet's family approves
+ * notes, and anyone can report. The real server must run this check again.
  */
 export function checkText(text: string, max: number, min = 0): TextProblem[] {
   const value = text.trim();
+  const v = normalizeForCheck(value);
   const problems: TextProblem[] = [];
   if (value.length < min) problems.push('tooShort');
   if (value.length > max) problems.push('tooLong');
-  if (EMAIL.test(value)) problems.push('email');
-  else if (LINK.test(value)) problems.push('link');
-  if (PHONE.test(value)) problems.push('phone');
-  else if (ADDRESS.test(value)) problems.push('address');
+  if (EMAIL.test(v)) problems.push('email');
+  else if (LINK.test(v) || HANDLE.test(value.normalize('NFKC').replace(ZERO_WIDTH, ''))) problems.push('link');
+  if (PHONE.test(v)) problems.push('phone');
+  else if (ADDRESS.test(v)) problems.push('address');
   return problems;
+}
+
+/** Words a family types when adding a pet (block 5 review, S-02). */
+export const PET_TEXT = { name: 30, about: 120, hello: 120 } as const;
+export function petTextProblems(input: { name: string; about: string; hello: string }): TextProblem[] {
+  return [...new Set([...checkText(input.name, PET_TEXT.name), ...checkText(input.about, PET_TEXT.about), ...checkText(input.hello, PET_TEXT.hello)])];
+}
+/** Words a neighbor types when adding a share shelf item. */
+export const SHARE_TEXT = { title: 60, condition: 60 } as const;
+export function shareTextProblems(input: { title: string; condition: string }): TextProblem[] {
+  return [...new Set([...checkText(input.title, SHARE_TEXT.title), ...checkText(input.condition, SHARE_TEXT.condition)])];
 }
 
 export const checkNote = (text: string) => checkText(text, LIMITS.note, LIMITS.noteMin);
@@ -314,7 +384,7 @@ export type PortraitConsent = { at: string; version: string; service: string };
 export type PortraitRequest = {
   id: string;
   petId: string;
-  petName: string;
+  /** No pet name: the portrait maker needs only the photo and the kind of animal (block 5 review). */
   kind: PetKind;
   requestedAt: string;
   status: RequestStatus;
@@ -327,6 +397,14 @@ export type PortraitRequest = {
 };
 
 export const isOpen = (r: PortraitRequest) => r.status === 'waiting' || r.status === 'photoOk' || r.status === 'sentBack';
+
+/**
+ * While a request is open, the photo the portrait maker checks must be the photo
+ * that goes out. So the family can change or remove the photo only when there is
+ * no open request, or when the portrait maker sent it back for a new one
+ * (block 5 review: a photo could be swapped after it passed the check).
+ */
+export const canChangePhoto = (open: PortraitRequest | undefined) => !open || !isOpen(open) || open.status === 'sentBack';
 
 export type RequestProblem = 'notFamily' | 'noPhoto' | 'notAgreed' | 'alreadyOpen' | 'householdLimit' | 'redoLimit' | 'serviceNotApproved';
 
@@ -410,7 +488,10 @@ export function advance(request: PortraitRequest, action: RequestAction): Portra
 }
 
 /** The photo may be kept only while its request is open. */
-export const mustDeletePhoto = (r: PortraitRequest) => !isOpen(r);
+/** A photo sent back (for example because it shows people) is not kept while the family finds a new one (block 5 review, S-13). */
+export const mustDeletePhoto = (r: PortraitRequest) => !isOpen(r) || r.status === 'sentBack';
+/** The portrait maker sees the photo only while it waits for a check or a portrait, never after sending it back. */
+export const makerMaySeePhoto = (r: PortraitRequest) => r.status === 'waiting' || r.status === 'photoOk';
 
 export function isExpired(request: PortraitRequest, now: Date): boolean {
   return isOpen(request) && now.getTime() - new Date(request.requestedAt).getTime() > PORTRAIT.keepPhotoDays * 86_400_000;

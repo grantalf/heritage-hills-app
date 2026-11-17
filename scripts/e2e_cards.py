@@ -86,7 +86,7 @@ def run(p, width, height, tag):
     note.fill("So sweet! Call me at 512 555 0199"); btn("Send the paw note").click(); wait(400)
     c("a note with a phone number is stopped, in plain words", has("Please take out the phone number."))
     note.fill("www.example.com has more dog pics"); btn("Send the paw note").click(); wait(400)
-    c("a note with a link is stopped", has("Please take out the link."))
+    c("a note with a link is stopped", has("Please take out the link or social media name."))
     note.fill("Biscuit carried my newspaper to the door. What a helper!"); btn("Send the paw note").click(); wait(500)
     c("a kind note goes to the family, not straight onto the card", has("Sent to the family") and not has("“Biscuit carried my newspaper"))
     note.fill("One more for Biscuit, he is great"); btn("Send the paw note").click(); wait(400)
@@ -125,7 +125,7 @@ def run(p, width, height, tag):
 
     # 4. The family adds a real photo and asks for a portrait.
     btn("Real photo and portrait").click(); wait(1000)
-    c("the agreement screen says who sees the photo and names the service", has("portrait maker will see your photo") and has("not chosen yet") and has("must not use your photo to train"))
+    c("the agreement screen says who sees the photo and names the service", has('"portrait maker" will see your photo') and has("not chosen yet") and has("must not use your photo to teach"))
     c("asking needs a photo first", btn("Ask for a portrait").is_disabled() and has("Choose a photo first."))
     with page.expect_file_chooser() as fc:
         btn("Choose a photo").click()
@@ -141,9 +141,9 @@ def run(p, width, height, tag):
         return { size: bytes.length, exif: text.includes('Exif'), model: text.includes('TestPhone'), width: src.length > 0 };
     }""")
     c("hidden details (location, phone model) are removed from the kept photo", kept["size"] > 1000 and not kept["exif"] and not kept["model"])
-    c("the photo starts private", page.get_by_role("radio", name="Only my family").get_attribute("aria-checked") == "true")
+    c("the photo starts private", page.get_by_role("radio", name="My family (and the portrait maker during a request)").get_attribute("aria-checked") == "true")
     c("asking needs a yes on the agreement", btn("Ask for a portrait").is_disabled())
-    page.get_by_role("checkbox", name="I agree. Send my request to the portrait maker.").click(); wait(200)
+    page.get_by_role("checkbox", name="I read this and I agree.").click(); wait(200)
     shot("portrait-request")
     btn("Ask for a portrait").click(); wait(600)
     c("the request is sent and the weekly batch is explained", has("Request sent") and has("on Sundays") and btn("Stop the request").count() == 1)
@@ -152,7 +152,8 @@ def run(p, width, height, tag):
     role("Board")
     c("the board sees the portrait maker's page on More", page.get_by_role("button", name="Portrait requests and suggestions", exact=False).count() == 1)
     go("/portraits"); wait(300)
-    c("the queue is oldest first, with the sample request on top", has("Waiting (2)") and page.get_by_text("Dog named Pepper").count() == 1 and page.get_by_text("Dog named Nutmeg").count() == 1)
+    c("the queue is oldest first, with the sample request on top", has("Waiting (2)") and page.get_by_text("Dog, request ").count() == 2)
+    c("the portrait maker does not see the pet's name", page.get_by_text("Pepper").count() == 0 and page.get_by_text("Nutmeg").count() == 0)
     c("the maker sees the photo while the request is open", page.get_by_role("img", name="Photo sent for a portrait").count() == 1)
     ok = page.get_by_role("button", name="The photo is OK")
     c("the photo cannot pass until every check is ticked", ok.nth(1).is_disabled())

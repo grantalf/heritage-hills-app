@@ -1,5 +1,5 @@
 import { router } from 'expo-router';
-import { Plus, Wrench } from 'lucide-react-native';
+import { Lock, LogIn, Plus, Wrench } from 'lucide-react-native';
 import { useState } from 'react';
 import { View } from 'react-native';
 
@@ -16,7 +16,7 @@ const FILTERS: Filter[] = ['all', 'tool', 'book', 'toy'];
 
 export default function ShareScreen() {
   const { t, tl } = useT();
-  const { needNeighbor } = useSession();
+  const { needNeighbor, isNeighbor } = useSession();
   const [filter, setFilter] = useState<Filter>('all');
   const items = useLoad((r) => r.listShareItems());
   const shown = items?.filter((i) => filter === 'all' || i.category === filter) ?? [];
@@ -26,6 +26,12 @@ export default function ShareScreen() {
       title={t('share.title')}
       subtitle={t('share.subtitle')}
       footer={<Btn icon={Plus} label={t('share.lend')} onPress={() => needNeighbor(() => router.push('/share/new'))} />}>
+      {!isNeighbor ? (
+        <>
+          <EmptyState icon={Lock} title={t('share.neighborsOnly')} body={t('share.neighborsOnlyHint')} />
+          <Btn kind="secondary" icon={LogIn} label={t('signIn.start')} onPress={() => router.push('/sign-in')} />
+        </>
+      ) : null}
       <Choices
         label={t('share.filter')}
         value={filter}
@@ -53,7 +59,7 @@ export default function ShareScreen() {
             }
           />
         ))}
-        {items && shown.length === 0 ? <EmptyState icon={Wrench} title={t('share.empty')} body={t('share.emptyHint')} /> : null}
+        {items && isNeighbor && shown.length === 0 ? <EmptyState icon={Wrench} title={t('share.empty')} body={t('share.emptyHint')} /> : null}
       </View>
       <Txt variant="small" tone="secondary">
         {t('share.footnote')}

@@ -268,8 +268,12 @@ export default function WorldScreen() {
                     aria-checked={on}
                     accessibilityLabel={t(`critters.group.${g}`)}
                     onPress={() => setGroup(on ? null : g)}
-                    style={{ minWidth: MIN_TOUCH + 8, minHeight: MIN_TOUCH + 8, alignItems: 'center', justifyContent: 'center', borderRadius: 28, borderWidth: on ? 4 : 2, borderColor: on ? ZONE_EXTRA.gold : ZONE.border, backgroundColor: on ? ZONE.primarySoft : ZONE.surface }}>
+                    // A word under each face, and a dark border when chosen (block 5 review, A-08, A-10).
+                    style={{ width: 84, minHeight: MIN_TOUCH + 28, alignItems: 'center', justifyContent: 'center', gap: 2, padding: 4, borderRadius: 14, borderWidth: on ? 4 : 2, borderColor: on ? ZONE.primary : ZONE.border, backgroundColor: on ? ZONE.primarySoft : ZONE.surface }}>
                     <PixelCritter id={GROUP_FACE[g]} size={36} />
+                    <Text numberOfLines={2} style={{ color: ZONE.text, fontSize: fs('small') - 2, lineHeight: (fs('small') - 2) * 1.2, fontWeight: '700', textAlign: 'center' }}>
+                      {t(`critters.group.${g}`)}
+                    </Text>
                   </Pressable>
                 );
               })}
@@ -311,6 +315,8 @@ export default function WorldScreen() {
                 if (after !== before) parts.push(t('quest.rankUp', { rank: t(`critters.rank.${after}`) }));
                 setToast(parts.join(' '));
                 setStatus(parts.join(' '));
+                // The status line sits behind the open place card, where screen readers cannot hear it, so say it directly (block 5 review, A-05).
+                AccessibilityInfo.announceForAccessibility(parts.join(' '));
               }}
               go={(href) => {
                 setOpen(null);
@@ -392,7 +398,7 @@ function PlaceRow({ place, here, onPress }: { place: Place; here: boolean; onPre
       accessibilityRole="button"
       accessibilityLabel={`${t(`place.${place.id}.name`)}. ${sub}`}
       onPress={onPress}
-      style={({ pressed }) => ({ flexDirection: 'row', alignItems: 'center', gap: space.md, minHeight: 68, padding: space.md, borderRadius: 8, borderWidth: here ? 3 : 2, borderColor: here ? ZONE_EXTRA.gold : ZONE.border, backgroundColor: place.kind === 'rescue' ? ZONE_EXTRA.spooky : pressed ? ZONE.surfaceStrong : ZONE.surface })}>
+      style={({ pressed }) => ({ flexDirection: 'row', alignItems: 'center', gap: space.md, minHeight: 68, padding: space.md, borderRadius: 8, borderWidth: here ? 4 : 2, borderColor: here ? ZONE.primary : ZONE.border, backgroundColor: place.kind === 'rescue' ? ZONE_EXTRA.spooky : pressed ? ZONE.surfaceStrong : ZONE.surface })}>
       <View style={{ width: 48, alignItems: 'center' }}>{place.host ? <PixelCritter id={place.host} size={36} /> : <Txt style={{ fontSize: 26 }}>{place.kind === 'rescue' ? '🗝️' : '🏫'}</Txt>}</View>
       <View style={{ flex: 1 }}>
         <Txt variant="lead" style={place.kind === 'rescue' ? { color: ZONE_EXTRA.onSpooky } : undefined}>
@@ -477,7 +483,8 @@ function PlaceCard({
 
   const likely = lookAround
     ? ctx.critters
-        .filter((c) => (all[c.id]?.zones[lookAround] ?? 0) > 0)
+        // Only animals with 10 or more sightings in all, so a few reports never point anywhere (block 5 review, S-05).
+        .filter((c) => (all[c.id]?.total ?? 0) >= MIN_FOR_PATTERN && (all[c.id]?.zones[lookAround] ?? 0) > 0)
         .sort((a, b) => (all[b.id]?.zones[lookAround] ?? 0) - (all[a.id]?.zones[lookAround] ?? 0))
         .slice(0, 6)
     : [];

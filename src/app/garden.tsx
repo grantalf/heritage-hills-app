@@ -58,7 +58,7 @@ export default function GardenScreen() {
           {t('garden.interestCount', { count: garden.interestCount })} ({t('common.sample').toLowerCase()})
         </Txt>
       ) : null}
-      {saved ? <Notice tone="good" icon={Check} title={t('garden.onList')} /> : null}
+      {saved ? <Notice announce tone="good" icon={Check} title={t('garden.onList')} /> : null}
       <View style={{ gap: space.sm }}>
         <CheckRow label={t('garden.want.plot')} checked={form.plot} onChange={set('plot')} />
         <CheckRow label={t('garden.want.build')} checked={form.build} onChange={set('build')} />

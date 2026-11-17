@@ -95,11 +95,14 @@ export const FROST_EXAMPLE: SkinPack = {
 
 export const PACKS: SkinPack[] = [BASE_PACK, FROST_EXAMPLE];
 
+const MONTH_DAY = /^(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01])$/;
 const monthDay = (date: Date): string => `${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
 
 /** Is the pack on for this day? Uses the phone's own calendar day. */
 export function packIsOn(pack: SkinPack, date: Date): boolean {
-  if (!pack.from || !pack.to) return true;
+  // The everyday pack has no dates. A pack with only one date is a mistake and stays off (block 5 review, S-27).
+  if (!pack.from && !pack.to) return true;
+  if (!pack.from || !pack.to || !MONTH_DAY.test(pack.from) || !MONTH_DAY.test(pack.to)) return false;
   const day = monthDay(date);
   return pack.from <= pack.to ? day >= pack.from && day <= pack.to : day >= pack.from || day <= pack.to;
 }
@@ -114,8 +117,9 @@ export type SkinChoice = {
 /** The packs in use on a day, everyday pack first. Later packs win. */
 export function activePacks(date: Date, choice: SkinChoice = {}, packs: SkinPack[] = PACKS): SkinPack[] {
   return packs.filter((pack) => {
-    if (!pack.from || !pack.to) return true;
+    if (!pack.from && !pack.to) return true;
     if (choice.force === pack.id) return true;
+    if (!pack.from || !pack.to) return false;
     if (pack.example || choice.seasonal === false) return false;
     return packIsOn(pack, date);
   });

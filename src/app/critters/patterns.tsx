@@ -20,9 +20,10 @@ export default function PatternsScreen() {
   const data = useLoad(async (r) => ({ critters: await r.listCritters(), all: await r.getObservations() }));
   if (!data) return <Screen title={t('critters.patterns')}>{null}</Screen>;
 
-  const withData = data.critters.filter((x) => (data.all[x.id]?.total ?? 0) > 0).sort((a, b) => data.all[b.id].total - data.all[a.id].total);
+  // Only animals with at least 10 sightings appear, and only their sightings count toward "all animals" (D-053; block 5 review, S-05).
+  const withData = data.critters.filter((x) => (data.all[x.id]?.total ?? 0) >= MIN_FOR_PATTERN).sort((a, b) => data.all[b.id].total - data.all[a.id].total);
   const critter = data.critters.find((x) => x.id === picked);
-  const counts = combine(data.all, picked ? [picked] : undefined);
+  const counts = combine(data.all, picked ? [picked] : withData.map((x) => x.id));
   const found = pattern(counts);
   const maxZone = Math.max(1, ...ZONES.map((z) => counts.zones[z]));
   const maxTime = Math.max(1, ...TIMES.map((x) => counts.times[x]));
@@ -87,6 +88,8 @@ export default function PatternsScreen() {
         </>
       ) : null}
 
+      {found.enough ? (
+        <>
       <SectionTitle>{t('critters.whereSeen')}</SectionTitle>
       <Txt variant="small" tone="secondary">
         {t('critters.notAMap')}
@@ -145,6 +148,8 @@ export default function PatternsScreen() {
           ))}
         </View>
       </Card>
+        </>
+      ) : null}
 
       <Notice tone="primary" icon={Lock} title={t('critters.patternsPrivacyTitle')} body={t('critters.patternsPrivacyBody')} />
     </Screen>
