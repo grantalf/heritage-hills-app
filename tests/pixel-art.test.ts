@@ -67,11 +67,14 @@ test('the frame list packed into the app matches the puppets', () => {
 });
 
 test('backdrop tiles line up at their left and right edges', () => {
-  const sheet = allSheets().find((s) => s.tile)!;
-  for (let i = 0; i < sheet.frames.length; i++) {
-    const s = drawFrame(sheet, i, LOOKS.thinFlat);
-    let same = 0;
-    for (let y = 0; y < s.h; y++) if (!!alpha(s, 0, y) === !!alpha(s, s.w - 1, y)) same += 1;
-    assert.ok(same >= s.h - 3, `${sheet.frames[i].name}: left and right edges match on ${same} of ${s.h} rows`);
+  const tiles = allSheets().filter((s) => s.tile);
+  assert.ok(tiles.length >= 2, 'the dusk street and the Frontier Lands');
+  for (const sheet of tiles) {
+    for (let i = 0; i < sheet.frames.length; i++) {
+      const s = drawFrame(sheet, i, LOOKS.thinFlat);
+      let same = 0;
+      for (let y = 0; y < s.h; y++) if (!!alpha(s, 0, y) === !!alpha(s, s.w - 1, y)) same += 1;
+      assert.ok(same >= s.h - 3, `${sheet.id}/${sheet.frames[i].name}: left and right edges match on ${same} of ${s.h} rows`);
+    }
   }
 });

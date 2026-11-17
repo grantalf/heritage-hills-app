@@ -18,4 +18,6 @@ export const MENU_TEXT_PAIRS: [keyof typeof MENU, keyof typeof MENU][] = [
   ['inkSoft', 'parchment'],
   ['parchment', 'wood'],
   ['parchment', 'woodDark'],
+  // Score digits on the score bar (block 2).
+  ['gold', 'woodDark'],
 ];

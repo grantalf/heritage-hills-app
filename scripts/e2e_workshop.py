@@ -43,8 +43,10 @@ with sync_playwright() as p:
         page.goto(BASE + "/workshop/styles"); wait(1200)
         check(f"{size}: four looks are shown", all(has(f"Look {x}") for x in "ABCD"))
         check(f"{size}: style page fits the screen width", fits())
-        page.get_by_role("button", name="Use this look below").nth(2).click(); wait()
-        check(f"{size}: choosing look D writes the line to send", has("Style pick: outline thick, shading shaded."))
+        # Look D is the founder's pick (D-074), so it starts chosen. Choosing look A changes the line.
+        check(f"{size}: look D starts chosen and its line is shown", has("Style pick: outline thick, shading shaded."))
+        page.get_by_role("button", name="Use this look below").nth(0).click(); wait()
+        check(f"{size}: choosing look A writes its line", has("Style pick: outline thin, shading flat."))
         page.get_by_role("tab", name="Pets").click(); wait()
         check(f"{size}: menu sample switches tabs", has("Zoomies") and has("Sample pet"))
         shot("styles")

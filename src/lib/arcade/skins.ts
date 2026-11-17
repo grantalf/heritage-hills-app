@@ -8,8 +8,12 @@
  */
 import type { L } from '../data/types';
 
-export type SkinRole = 'hero' | 'shambler' | 'lunger' | 'tosser' | 'boss' | 'shot' | 'snack' | 'cage' | 'pedestal' | 'backdrop' | 'squirrel' | 'armadillo' | 'cottontail' | 'dog';
-export const SKIN_ROLES: SkinRole[] = ['hero', 'shambler', 'lunger', 'tosser', 'boss', 'shot', 'snack', 'cage', 'pedestal', 'backdrop', 'squirrel', 'armadillo', 'cottontail', 'dog'];
+/** `hero` is Bo, the first hero. `flor` is the second hero (block 2). `frontier` is the Frontier Lands scenery. */
+export type SkinRole = 'hero' | 'flor' | 'shambler' | 'lunger' | 'tosser' | 'boss' | 'shot' | 'snack' | 'cage' | 'pedestal' | 'backdrop' | 'frontier' | 'squirrel' | 'armadillo' | 'cottontail' | 'dog';
+export const SKIN_ROLES: SkinRole[] = ['hero', 'flor', 'shambler', 'lunger', 'tosser', 'boss', 'shot', 'snack', 'cage', 'pedestal', 'backdrop', 'frontier', 'squirrel', 'armadillo', 'cottontail', 'dog'];
+
+/** The skin role for the hero the player chose. */
+export const heroRole = (heroId: 'bo' | 'flor'): SkinRole => (heroId === 'flor' ? 'flor' : 'hero');
 
 export type Skin = {
   /** Sprite sheet id in the atlas. */
@@ -17,7 +21,7 @@ export type Skin = {
   /** If the sheet uses other animation names, map the game's names to them. */
   anims?: Record<string, string>;
   name: L;
-  /** Sound names. Playback arrives in block 2; the slots exist now so packs can fill them. */
+  /** Sound names from lib/arcade/sound.ts. A holiday pack can swap a sound by naming a different one. */
   sounds?: { bonked?: string; poof?: string; voice?: string };
 };
 
@@ -35,6 +39,7 @@ export type SkinPack = {
 /** Animations the rules ask for. A skin must have all of them for its role. */
 export const REQUIRED_ANIMS: Record<SkinRole, string[]> = {
   hero: ['idle', 'walk', 'attack1', 'attack2', 'attack3', 'hurt', 'down', 'cheer'],
+  flor: ['idle', 'walk', 'attack1', 'attack2', 'attack3', 'hurt', 'down', 'cheer'],
   shambler: ['idle', 'walk', 'wind', 'attack', 'hurt'],
   lunger: ['idle', 'walk', 'wind', 'attack', 'hurt'],
   tosser: ['idle', 'walk', 'wind', 'attack', 'hurt'],
@@ -44,6 +49,7 @@ export const REQUIRED_ANIMS: Record<SkinRole, string[]> = {
   cage: ['idle', 'open'],
   pedestal: ['idle'],
   backdrop: ['far', 'near'],
+  frontier: ['far', 'near'],
   squirrel: ['cheer', 'run'],
   armadillo: ['cheer', 'run'],
   cottontail: ['cheer', 'run'],
@@ -56,7 +62,8 @@ export const BASE_PACK: SkinPack = {
   id: 'base',
   name: { en: 'Everyday', es: 'De todos los días' },
   skins: {
-    hero: { sheet: 'hero', name: { en: 'Noodle Neighbor', es: 'Vecino del Flotador' }, sounds: { bonked: 'oof' } },
+    hero: { sheet: 'hero', name: { en: 'Bo', es: 'Bo' }, sounds: { bonked: 'oof' } },
+    flor: { sheet: 'flor', name: { en: 'Flor', es: 'Flor' }, sounds: { bonked: 'oof' } },
     shambler: { sheet: 'shambler', name: { en: 'Shambler', es: 'Zombi Torpe' }, sounds: { bonked: 'bonk', poof: 'poof' } },
     lunger: { sheet: 'lunger', name: { en: 'Ghoul', es: 'Espectro' }, sounds: { bonked: 'bonk', poof: 'poof' } },
     tosser: { sheet: 'tosser', name: { en: 'Mud Imp', es: 'Duende de Lodo' }, sounds: { bonked: 'bonk', poof: 'poof' } },
@@ -66,6 +73,7 @@ export const BASE_PACK: SkinPack = {
     cage: { sheet: 'props', anims: { idle: 'cage', open: 'cageOpen' }, name: { en: 'Cage', es: 'Jaula' } },
     pedestal: { sheet: 'props', anims: { idle: 'pedestal' }, name: { en: 'Stone base', es: 'Base de piedra' } },
     backdrop: { sheet: 'backdrop', name: { en: 'Dusk street', es: 'Calle al atardecer' } },
+    frontier: { sheet: 'frontier', name: { en: 'Frontier Lands', es: 'Tierras de la Frontera' } },
     squirrel: critterSkin('squirrel', 'Fox squirrel', 'Ardilla zorro'),
     armadillo: critterSkin('armadillo', 'Armadillo', 'Armadillo'),
     cottontail: critterSkin('cottontail', 'Cottontail', 'Conejo cola de algodón'),

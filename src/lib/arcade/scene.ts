@@ -6,7 +6,7 @@
  */
 import { ATLAS } from './atlas.generated';
 import { type Actor, type GameEvent, type World } from './rules';
-import { animName, type Skin, type SkinRole } from './skins';
+import { animName, heroRole, type Skin, type SkinRole } from './skins';
 
 /** Height of the stage in art pixels, and where the street begins. */
 export const VIEW_H = 124;
@@ -66,7 +66,7 @@ function animFor(a: Actor): string {
 
 const SHADOW: Partial<Record<Actor['role'], number>> = { hero: 22, shambler: 22, lunger: 22, tosser: 16, boss: 60, critter: 14, shot: 8 };
 
-export type Scene = { draws: Draw[]; farX: number; nearX: number };
+export type Scene = { draws: Draw[]; farX: number; nearX: number; backdrop: string; mood: string };
 
 export function buildScene(world: World, skins: Record<SkinRole, Skin>, fx: Fx[] = []): Scene {
   const draws: (Draw & { depth: number })[] = [];
@@ -77,7 +77,7 @@ export function buildScene(world: World, skins: Record<SkinRole, Skin>, fx: Fx[]
   if (world.level.boss) add('pedestal', skins.pedestal, 'idle', 0, world.level.boss.x, world.level.boss.z - 0.5, false);
 
   for (const a of world.actors) {
-    const role: SkinRole = a.role === 'critter' ? ((a.kind ?? 'squirrel') as SkinRole) : (a.role as SkinRole);
+    const role: SkinRole = a.role === 'critter' ? ((a.kind ?? 'squirrel') as SkinRole) : a.role === 'hero' ? heroRole(world.heroId) : (a.role as SkinRole);
     const skin = skins[role];
     if (!skin) continue;
     const onPedestal = a.role === 'boss' && a.state === 'statue' ? 6 : 0;
@@ -92,15 +92,16 @@ export function buildScene(world: World, skins: Record<SkinRole, Skin>, fx: Fx[]
 
   draws.sort((p, q) => p.depth - q.depth || (p.key < q.key ? -1 : 1));
   const wrap = (v: number) => -(((v % TILE_W) + TILE_W) % TILE_W);
-  return { draws: draws.map(({ depth: _depth, ...d }) => d), farX: wrap(world.cameraX * 0.35), nearX: wrap(world.cameraX) };
+  const scenery = world.level.scenery;
+  const backdrop = scenery ? (skins[scenery.backdrop as SkinRole]?.sheet ?? skins.backdrop.sheet) : skins.backdrop.sheet;
+  return { draws: draws.map(({ depth: _depth, ...d }) => d), farX: wrap(world.cameraX * 0.35), nearX: wrap(world.cameraX), backdrop, mood: scenery?.mood ?? 'dusk' };
 }
 
 /** One plain sentence for screen readers and the status line under the stage. */
-export type StatusKey = 'start' | 'waveStart' | 'waveClear' | 'bossWake' | 'bossStun' | 'bossSettle' | 'cageOpen' | 'won' | 'heroDown';
+export type StatusKey = 'start' | 'waveStart' | 'waveClear' | 'bossWake' | 'bossAngry' | 'bossStun' | 'bossSettle' | 'cageOpen' | 'won' | 'heroDown';
+const STATUS_EVENTS = new Set<string>(['waveStart', 'waveClear', 'bossWake', 'bossAngry', 'bossStun', 'bossSettle', 'cageOpen', 'won', 'heroDown']);
 export function statusFor(events: GameEvent[]): StatusKey | undefined {
   let found: StatusKey | undefined;
-  for (const e of events) {
-    if (e.type === 'waveStart' || e.type === 'waveClear' || e.type === 'bossWake' || e.type === 'bossStun' || e.type === 'bossSettle' || e.type === 'cageOpen' || e.type === 'won' || e.type === 'heroDown') found = e.type;
-  }
+  for (const e of events) if (STATUS_EVENTS.has(e.type)) found = e.type as StatusKey;
   return found;
 }

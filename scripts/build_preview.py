@@ -2,13 +2,18 @@
 Packs a one-bundle web export into a single self-contained HTML file for previews.
 Usage:
   EXPO_NO_BUNDLE_SPLITTING=1 npx expo export --platform web --output-dir /tmp/hh-web
-  python3 scripts/build_preview.py /tmp/hh-web /tmp/hh-preview/index.html
+  python3 scripts/build_preview.py /tmp/hh-web /tmp/hh-preview/index.html [start page] [title]
+The start page defaults to Home ("/"). Example: /brawler opens Critter Rescue.
 """
 import glob
 import os
 import sys
 
 src, out = sys.argv[1], sys.argv[2]
+start = sys.argv[3] if len(sys.argv) > 3 else "/"
+title = sys.argv[4] if len(sys.argv) > 4 else "Heritage Hills app: first draft preview"
+if not start.startswith("/") or any(ch in start for ch in "\"'<>"):
+    sys.exit("start page must be a path like /brawler")
 bundles = glob.glob(os.path.join(src, "_expo/static/js/web/*.js"))
 if len(bundles) != 1:
     sys.exit(f"expected exactly one bundle, found {len(bundles)}; export with EXPO_NO_BUNDLE_SPLITTING=1")
@@ -19,7 +24,7 @@ html = f"""<!DOCTYPE html>
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Heritage Hills app: first draft preview</title>
+<title>{title}</title>
 <style>
   html, body {{ height: 100%; margin: 0; }}
   body {{ overflow: hidden; background: #ffffff; }}
@@ -31,8 +36,8 @@ html = f"""<!DOCTYPE html>
 <noscript>This preview needs JavaScript.</noscript>
 <div id="root"></div>
 <script>
-  // Previews are opened at an address the app does not know. Start at Home.
-  try {{ history.replaceState(null, "", "/"); }} catch (e) {{}}
+  // Previews are opened at an address the app does not know. Start at the chosen page.
+  try {{ history.replaceState(null, "", "{start}"); }} catch (e) {{}}
 </script>
 <script>
 {js}
