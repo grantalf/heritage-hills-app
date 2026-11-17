@@ -1,4 +1,4 @@
-import { ChartColumn, HandHeart, Info, Landmark, Megaphone, PiggyBank, Settings, ShieldCheck, Sparkles, LifeBuoy } from 'lucide-react-native';
+import { ChartColumn, Gamepad2, HandHeart, Info, Landmark, LifeBuoy, Megaphone, PiggyBank, Settings, ShieldCheck, Sparkles } from 'lucide-react-native';
 import { View } from 'react-native';
 
 import { Card, Choices, RowLink, Screen, SectionTitle, Txt } from '@/components/ui';
@@ -40,6 +40,7 @@ export default function MoreScreen() {
         <RowLink icon={ChartColumn} title={t('numbers.title')} subtitle={t('numbers.subtitle')} href="/numbers" />
         <RowLink icon={Sparkles} title={t('capital.title')} subtitle={t('capital.subtitle')} href="/capital" />
         <RowLink icon={HandHeart} title={t('help.title')} subtitle={t('help.subtitle')} href="/help" />
+        <RowLink icon={Gamepad2} title={t('workshop.title')} subtitle={t('workshop.subtitle')} href="/workshop" />
       </View>
 
       <SectionTitle>{t('more.app')}</SectionTitle>

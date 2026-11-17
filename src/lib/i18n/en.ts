@@ -1,8 +1,11 @@
+import { workshopEn } from './workshop.en';
+
 /**
  * English interface text. Sixth-grade reading level. Buttons are verbs.
  * Every key here must also exist in es.ts (checked by tests/i18n.test.ts).
  */
 export const en = {
+  ...workshopEn,
   'draft.banner': 'First draft · Sample data · Nothing is sent',
 
   'common.back': 'Back',

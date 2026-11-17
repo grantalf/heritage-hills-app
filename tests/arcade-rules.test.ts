@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 
+import { autoplay } from '../src/lib/arcade/autoplay';
 import { SHORT_LEVEL, WORKSHOP_LEVEL } from '../src/lib/arcade/levels';
 import { createWorld, DEPTH, ENEMY, fingerprint, HERO, heroOf, isEnemy, NO_INPUT, retry, step, STEP, TUNING, type Actor, type GameEvent, type Input, type World } from '../src/lib/arcade/rules';
 
@@ -16,33 +17,7 @@ const boss = (w: World) => w.actors.find((a) => a.role === 'boss') as Actor;
 /** Tap the bonk button: down on one step, up on the next. */
 const tap = (w: World): Input => ({ x: 0, z: 0, attack: !w.prevAttack });
 
-/** A simple player: walks right, lines up with the nearest monster, bonks, and steps out of the way of the boss. */
-function bot(w: World): Input {
-  const hero = heroOf(w);
-  const b = boss(w);
-  const away = (fromZ: number) => (hero.z >= fromZ ? (hero.z < DEPTH - 1 ? 1 : -1) : hero.z > 1 ? -1 : 1);
-  const goBonk = (t: Actor, reach: number): Input => {
-    const dx = t.x - hero.x;
-    const dz = t.z - hero.z;
-    if (Math.abs(dz) > 5) return { x: Math.abs(dx) > reach ? Math.sign(dx) : 0, z: Math.sign(dz), attack: false };
-    if (Math.abs(dx) > reach) return { x: Math.sign(dx), z: 0, attack: false };
-    if (Math.sign(dx) !== hero.face && Math.abs(dx) > 4) return { x: Math.sign(dx), z: 0, attack: false };
-    return tap(w);
-  };
-  if (w.phase === 'boss' && b && b.state !== 'statue' && b.state !== 'settle') {
-    if (b.state === 'stun') return goBonk(b, HERO.reach + 14);
-    const dz = Math.abs(hero.z - b.z);
-    const dx = Math.abs(hero.x - b.x);
-    return { x: dx < 52 ? Math.sign(hero.x - b.x) || 1 : 0, z: dz < 15 ? away(b.z) : 0, attack: false };
-  }
-  const shot = w.actors.find((a) => a.role === 'shot' && Math.abs(a.x - hero.x) < 40 && Math.abs(a.z - hero.z) < 9);
-  if (shot) return { x: 0, z: away(shot.z), attack: false };
-  const lunging = w.actors.find((a) => a.role === 'lunger' && (a.state === 'wind' || a.state === 'attack') && Math.abs(a.z - hero.z) < 9);
-  if (lunging) return { x: 0, z: away(lunging.z), attack: false };
-  const enemies = w.actors.filter(isEnemy).sort((p, q) => Math.abs(p.x - hero.x) - Math.abs(q.x - hero.x));
-  if (enemies.length) return goBonk(enemies[0], HERO.reach - 6);
-  return { x: 1, z: 0, attack: false };
-}
+const bot = autoplay;
 
 test('the same seed and the same buttons give exactly the same game', () => {
   const a = createWorld(WORKSHOP_LEVEL, { seed: 7 });
@@ -185,6 +160,16 @@ test('the statue cannot be bonked until it wakes, and wakes only after the last 
   run(w, tap, seconds(1));
   assert.equal(b.state, 'statue');
   assert.equal(b.hp, b.maxHp);
+});
+
+test('the statue stays on its base through every wave', () => {
+  const w = createWorld(WORKSHOP_LEVEL, { seed: 2 });
+  for (let i = 0; i < seconds(120) && w.phase === 'play'; i++) {
+    step(w, bot(w));
+    assert.equal(boss(w).x, WORKSHOP_LEVEL.boss!.x);
+    if (w.phase === 'play') assert.equal(boss(w).state, 'statue');
+  }
+  assert.equal(w.phase, 'boss');
 });
 
 test('a charge that runs into the edge of the arena leaves the boss dizzy, and dizzy bonks count double', () => {

@@ -1,0 +1,93 @@
+/**
+ * On-screen game controls. One touch surface handles every finger, because a
+ * player holds a direction with one thumb and bonks with the other. Separate
+ * buttons would only notice one finger at a time.
+ *
+ * Left half: touch and slide to move. Right half: touch to bonk.
+ */
+import { useRef, useState } from 'react';
+import { View, type GestureResponderEvent, type ViewStyle } from 'react-native';
+
+import { Txt, useUI } from '@/components/ui';
+
+const HEIGHT = 168;
+/** Stops the browser from selecting text or scrolling while a thumb is on the controls. */
+const NO_SELECT = { userSelect: 'none', touchAction: 'none' } as ViewStyle;
+const DEAD = 12;
+
+export function Pad({ onInput, moveLabel, bonkLabel, label, disabled }: { onInput: (x: number, z: number, bonk: boolean) => void; moveLabel: string; bonkLabel: string; label: string; disabled?: boolean }) {
+  const { c } = useUI();
+  const box = useRef({ x: 0, y: 0, w: 320, h: HEIGHT });
+  const [show, setShow] = useState({ dx: 0, dy: 0, bonk: false });
+
+  // The first touch tells us where the surface sits on the screen. Children ignore touches, so the touch target is the surface itself.
+  const place = (e: GestureResponderEvent) => {
+    box.current.x = e.nativeEvent.pageX - e.nativeEvent.locationX;
+    box.current.y = e.nativeEvent.pageY - e.nativeEvent.locationY;
+  };
+
+  const read = (e: GestureResponderEvent) => {
+    const { x, y, w, h } = box.current;
+    const touches = e.nativeEvent.touches ?? [];
+    let mx = 0;
+    let mz = 0;
+    let bonk = false;
+    for (const touch of touches) {
+      const lx = touch.pageX - x;
+      const ly = touch.pageY - y;
+      if (lx < 0 || lx > w || ly < -40 || ly > h + 40) continue;
+      if (lx < w / 2) {
+        const dx = lx - w * 0.25;
+        const dy = ly - h / 2;
+        mx = Math.abs(dx) > DEAD ? Math.sign(dx) : 0;
+        mz = Math.abs(dy) > DEAD ? Math.sign(dy) : 0;
+      } else bonk = true;
+    }
+    onInput(mx, mz, bonk);
+    setShow((s) => (s.dx === mx && s.dy === mz && s.bonk === bonk ? s : { dx: mx, dy: mz, bonk }));
+  };
+  const clear = () => {
+    onInput(0, 0, false);
+    setShow({ dx: 0, dy: 0, bonk: false });
+  };
+
+  return (
+    <View
+      onLayout={(e) => {
+        box.current.w = e.nativeEvent.layout.width;
+        box.current.h = e.nativeEvent.layout.height;
+      }}
+      accessible
+      accessibilityLabel={label}
+      onStartShouldSetResponder={() => !disabled}
+      onMoveShouldSetResponder={() => !disabled}
+      onResponderTerminationRequest={() => false}
+      onResponderGrant={(e) => {
+        place(e);
+        read(e);
+      }}
+      onResponderStart={read}
+      onResponderMove={read}
+      onResponderEnd={read}
+      onResponderRelease={clear}
+      onResponderTerminate={clear}
+      style={[{ height: HEIGHT, flexDirection: 'row', direction: 'ltr', opacity: disabled ? 0.4 : 1 }, NO_SELECT]}>
+      <View pointerEvents="none" style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
+        <View style={{ width: 132, height: 132, borderRadius: 66, borderWidth: 2, borderColor: c.border, backgroundColor: c.surface, alignItems: 'center', justifyContent: 'center' }}>
+          <Txt variant="label" tone="secondary" style={{ position: 'absolute', top: 6 }}>▲</Txt>
+          <Txt variant="label" tone="secondary" style={{ position: 'absolute', bottom: 6 }}>▼</Txt>
+          <Txt variant="label" tone="secondary" style={{ position: 'absolute', left: 10 }}>◀</Txt>
+          <Txt variant="label" tone="secondary" style={{ position: 'absolute', right: 10 }}>▶</Txt>
+          <View style={{ width: 60, height: 60, borderRadius: 30, backgroundColor: c.primary, alignItems: 'center', justifyContent: 'center', transform: [{ translateX: show.dx * 26 }, { translateY: show.dy * 26 }] }}>
+            <Txt variant="label" tone="onPrimary">{moveLabel}</Txt>
+          </View>
+        </View>
+      </View>
+      <View pointerEvents="none" style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
+        <View style={{ width: 116, height: 116, borderRadius: 58, borderWidth: 3, borderColor: c.primary, backgroundColor: show.bonk ? c.primary : c.primarySoft, alignItems: 'center', justifyContent: 'center', transform: [{ scale: show.bonk ? 0.94 : 1 }] }}>
+          <Txt variant="title" style={{ color: show.bonk ? c.onPrimary : c.text }}>{bonkLabel}</Txt>
+        </View>
+      </View>
+    </View>
+  );
+}

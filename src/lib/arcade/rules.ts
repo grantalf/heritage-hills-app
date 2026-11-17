@@ -180,8 +180,8 @@ export const isEnemy = (a: Actor): boolean => a.role === 'shambler' || a.role ==
 const clamp = (v: number, lo: number, hi: number) => Math.max(lo, Math.min(hi, v));
 const sign = (v: number): 1 | -1 => (v < 0 ? -1 : 1);
 
-/** Small repeatable random number generator, so a game can be replayed exactly in tests. */
-function random(world: World): number {
+/** Small repeatable random number generator for levels that need chance. A game still replays exactly from its seed. */
+export function chance(world: World): number {
   let t = (world.rng += 0x6d2b79f5);
   t = Math.imul(t ^ (t >>> 15), t | 1);
   t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
@@ -240,7 +240,8 @@ export function step(world: World, input: Input): World {
   for (const a of world.actors) {
     if (isEnemy(a) || a.role === 'boss') {
       a.z = clamp(a.z, 0, DEPTH);
-      if (world.locked && a.state !== 'walk' && a.state !== 'settle') a.x = clamp(a.x, left - 4, right + 4);
+      // Monsters stay inside a held screen. The boss looks after its own place.
+      if (isEnemy(a) && world.locked && a.state !== 'walk') a.x = clamp(a.x, left - 4, right + 4);
     }
   }
   world.prevAttack = input.attack;
