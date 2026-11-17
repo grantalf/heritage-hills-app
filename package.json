@@ -6,6 +6,7 @@
     "@expo/ui": "~58.0.28",
     "@react-native-async-storage/async-storage": "2.2.0",
     "expo": "~58.0.25",
+    "expo-audio": "~58.0.12",
     "expo-constants": "~58.0.16",
     "expo-device": "~58.0.5",
     "expo-font": "~58.0.12",
@@ -50,7 +51,8 @@
     "test": "node --import tsx --test tests/*.test.ts",
     "export:web": "expo export --platform web",
     "sprites": "node --import tsx scripts/make_sprites.mts",
-    "check": "npm run typecheck && npm run lint && npm test"
+    "check": "npm run typecheck && npm run lint && npm test",
+    "sounds": "node --import tsx scripts/make_sounds.mts"
   },
   "private": true
 }

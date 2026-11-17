@@ -61,6 +61,66 @@ export const ATLAS = {
    }
   }
  },
+ "flor": {
+  "id": "flor",
+  "cw": 84,
+  "ch": 76,
+  "ax": 34,
+  "ay": 66,
+  "cols": 8,
+  "rows": 3,
+  "count": 17,
+  "anims": {
+   "idle": {
+    "from": 0,
+    "count": 2,
+    "fps": 3,
+    "loop": true
+   },
+   "walk": {
+    "from": 2,
+    "count": 4,
+    "fps": 8,
+    "loop": true
+   },
+   "attack1": {
+    "from": 6,
+    "count": 2,
+    "fps": 12,
+    "loop": false
+   },
+   "attack2": {
+    "from": 8,
+    "count": 2,
+    "fps": 12,
+    "loop": false
+   },
+   "attack3": {
+    "from": 10,
+    "count": 3,
+    "fps": 10,
+    "loop": false
+   },
+   "hurt": {
+    "from": 13,
+    "count": 1,
+    "fps": 1,
+    "loop": false
+   },
+   "down": {
+    "from": 14,
+    "count": 1,
+    "fps": 1,
+    "loop": false
+   },
+   "cheer": {
+    "from": 15,
+    "count": 2,
+    "fps": 5,
+    "loop": true
+   }
+  }
+ },
  "shambler": {
   "id": "shambler",
   "cw": 56,
@@ -489,6 +549,30 @@ export const ATLAS = {
  },
  "backdrop": {
   "id": "backdrop",
+  "cw": 128,
+  "ch": 48,
+  "ax": 0,
+  "ay": 48,
+  "cols": 2,
+  "rows": 1,
+  "count": 2,
+  "anims": {
+   "far": {
+    "from": 0,
+    "count": 1,
+    "fps": 1,
+    "loop": false
+   },
+   "near": {
+    "from": 1,
+    "count": 1,
+    "fps": 1,
+    "loop": false
+   }
+  }
+ },
+ "frontier": {
+  "id": "frontier",
   "cw": 128,
   "ch": 48,
   "ax": 0,

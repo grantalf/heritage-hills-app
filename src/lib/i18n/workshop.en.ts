@@ -71,6 +71,7 @@ export const workshopEn = {
   'street.status.waveStart': 'Monsters! Bonk them.',
   'street.status.waveClear': 'All clear. Walk right.',
   'street.status.bossWake': 'The statue is waking up! Step out of its way when it lowers its head.',
+  'street.status.bossAngry': 'The statue is angry! It charges faster now. Keep stepping aside.',
   'street.status.bossStun': 'It ran into the wall and is dizzy. Bonk it now!',
   'street.status.bossSettle': 'The spell is broken. It is a statue again.',
   'street.status.cageOpen': 'The cage is open!',

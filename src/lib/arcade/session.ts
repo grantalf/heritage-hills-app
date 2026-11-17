@@ -4,7 +4,7 @@
  * number changes. No React and no phone code, so it is tested like the rules.
  */
 import { autoplay } from './autoplay';
-import { createWorld, retry, step, STEP, type Difficulty, type Input, type Level, type World } from './rules';
+import { createWorld, retry, step, STEP, type Difficulty, type GameEvent, type HeroId, type Input, type Level, type World } from './rules';
 import { advanceFx, statusFor, type Fx, type StatusKey } from './scene';
 
 /** Never catch up more than this many steps in one frame. A slow phone slows the game; it does not skip it. */
@@ -19,6 +19,8 @@ export class GameSession {
   private owed = 0;
   private fxId = 0;
   private listeners = new Set<() => void>();
+  /** Everything that happened since the screen last asked: for sounds. */
+  private events: GameEvent[] = [];
 
   subscribe = (listener: () => void): (() => void) => {
     this.listeners.add(listener);
@@ -31,9 +33,10 @@ export class GameSession {
     for (const listener of this.listeners) listener();
   }
 
-  start(level: Level, options: { difficulty: Difficulty; viewW: number; seed?: number }) {
+  start(level: Level, options: { difficulty: Difficulty; viewW: number; seed?: number; hero?: HeroId }) {
     this.world = createWorld(level, options);
     this.fx = [];
+    this.events = [];
     this.owed = 0;
     this.status = 'start';
     this.input = { x: 0, z: 0, attack: false };
@@ -48,6 +51,13 @@ export class GameSession {
     this.owed = 0;
     this.status = 'waveClear';
     this.changed();
+  }
+
+  /** Takes the events collected since the last call. */
+  takeEvents(): GameEvent[] {
+    const out = this.events;
+    this.events = [];
+    return out;
   }
 
   setInput(x: number, z: number, attack: boolean) {
@@ -65,6 +75,7 @@ export class GameSession {
       step(world, auto ? autoplay(world) : this.input);
       this.fx = advanceFx(this.fx, world.events, STEP, () => ++this.fxId);
       this.status = statusFor(world.events) ?? this.status;
+      if (this.events.length < 64) this.events.push(...world.events);
       this.owed -= STEP;
       steps += 1;
     }

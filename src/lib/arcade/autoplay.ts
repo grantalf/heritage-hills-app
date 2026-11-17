@@ -3,10 +3,11 @@
  * finished, and "Watch it play" lets someone who cannot use the buttons still
  * see the story.
  */
-import { DEPTH, HERO, heroOf, isEnemy, type Actor, type Input, type World } from './rules';
+import { DEPTH, heroOf, heroStats, isEnemy, type Actor, type Input, type World } from './rules';
 
 export function autoplay(w: World): Input {
   const hero = heroOf(w);
+  const HERO = heroStats(w);
   const boss = w.actors.find((a) => a.role === 'boss');
   const tap: Input = { x: 0, z: 0, attack: !w.prevAttack };
   const away = (fromZ: number) => (hero.z >= fromZ ? (hero.z < DEPTH - 1 ? 1 : -1) : hero.z > 1 ? -1 : 1);

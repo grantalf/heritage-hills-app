@@ -73,6 +73,7 @@ export const workshopEs: Record<keyof typeof workshopEn, string> = {
   'street.status.waveStart': '¡Monstruos! Deles golpecitos.',
   'street.status.waveClear': 'Todo despejado. Camine a la derecha.',
   'street.status.bossWake': '¡La estatua está despertando! Quítese de su camino cuando baje la cabeza.',
+  'street.status.bossAngry': '¡La estatua se enojó! Ahora embiste más rápido. Siga haciéndose a un lado.',
   'street.status.bossStun': 'Chocó con la pared y está mareada. ¡Dele golpecitos ahora!',
   'street.status.bossSettle': 'El hechizo se rompió. Es una estatua otra vez.',
   'street.status.cageOpen': '¡La jaula está abierta!',

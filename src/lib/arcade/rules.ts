@@ -14,6 +14,8 @@ export const STEP = 1 / 60;
 export const DEPTH = 44;
 
 export type EnemyRole = 'shambler' | 'lunger' | 'tosser';
+/** Which hero the player chose. Each has its own reach and speed (block 2). */
+export type HeroId = 'bo' | 'flor';
 export type Role = 'hero' | EnemyRole | 'boss' | 'shot' | 'snack' | 'cage' | 'critter';
 export type Difficulty = 'gentle' | 'classic';
 export type State = 'idle' | 'walk' | 'attack' | 'wind' | 'hurt' | 'down' | 'statue' | 'wake' | 'charge' | 'stomp' | 'stun' | 'settle' | 'run' | 'cheer' | 'open';
@@ -32,6 +34,8 @@ export type Level = {
   boss?: { x: number; z: number };
   /** Every level ends with a rescue. `critters` are skin-pack roles such as 'squirrel'. */
   cage: { x: number; z: number; critters: string[] };
+  /** How the level looks. The rules ignore it; the painter reads it. */
+  scenery?: { mood: string; backdrop: string };
 };
 
 export type Actor = {
@@ -64,15 +68,18 @@ export type Actor = {
 };
 
 export type GameEvent =
-  | { type: 'bonk'; x: number; z: number; finisher: boolean }
+  | { type: 'bonk'; x: number; z: number; finisher: boolean; boss?: boolean }
   | { type: 'poof'; x: number; z: number; role: Role }
-  | { type: 'heroHurt' | 'heroDown' | 'snack' | 'waveStart' | 'waveClear' | 'bossWake' | 'bossStun' | 'bossSettle' | 'cageOpen' | 'won' }
+  | { type: 'heroHurt' | 'heroDown' | 'snack' | 'waveStart' | 'waveClear' | 'bossWake' | 'bossAngry' | 'bossStun' | 'bossSettle' | 'cageOpen' | 'won' | 'swing' | 'charge' }
   | { type: 'stomp'; x: number; z: number }
   | { type: 'rescued'; kind: string };
 
 export type World = {
   level: Level;
   difficulty: Difficulty;
+  heroId: HeroId;
+  /** The boss has lost half its health and moves faster. */
+  bossAngry: boolean;
   viewW: number;
   time: number;
   cameraX: number;
@@ -103,7 +110,20 @@ export const TUNING: Record<Difficulty, Tuning> = {
   classic: { heroHp: 8, enemySpeed: 1, wind: 1, attackers: 2, bossHp: 24, bossCharge: 135, bossStun: 2.2 },
 };
 
-export const HERO = { speedX: 62, speedZ: 40, reach: 30, depthReach: 9, swing: [0.22, 0.22, 0.34], lands: 0.07, damage: [1, 1, 2], hurt: 0.3, safe: 1.1, comboGap: 0.4 };
+export type HeroStats = { speedX: number; speedZ: number; reach: number; depthReach: number; swing: number[]; lands: number; damage: number[]; hurt: number; safe: number; comboGap: number };
+/**
+ * Bo swings a pool noodle: quick feet, short reach. Flor swings a rake: long
+ * reach, slower feet, a slower last swing that hits harder. Both have the same
+ * health, so the choice is about how you like to play, not how hard it is.
+ */
+export const HEROES: Record<HeroId, HeroStats> = {
+  bo: { speedX: 62, speedZ: 40, reach: 30, depthReach: 9, swing: [0.22, 0.22, 0.34], lands: 0.07, damage: [1, 1, 2], hurt: 0.3, safe: 1.1, comboGap: 0.4 },
+  flor: { speedX: 52, speedZ: 36, reach: 40, depthReach: 9, swing: [0.26, 0.26, 0.42], lands: 0.09, damage: [1, 1, 3], hurt: 0.3, safe: 1.1, comboGap: 0.42 },
+};
+export const HERO_IDS: HeroId[] = ['bo', 'flor'];
+/** Bo's numbers. Kept for older code and tests that knew only one hero. */
+export const HERO = HEROES.bo;
+export const heroStats = (world: Pick<World, 'heroId'>): HeroStats => HEROES[world.heroId];
 export const ENEMY: Record<EnemyRole, { hp: number; speed: number; reach: number; wind: number; rest: number; score: number }> = {
   shambler: { hp: 3, speed: 22, reach: 16, wind: 0.45, rest: 0.9, score: 100 },
   lunger: { hp: 2, speed: 34, reach: 62, wind: 0.5, rest: 1.2, score: 150 },
@@ -112,6 +132,8 @@ export const ENEMY: Record<EnemyRole, { hp: number; speed: number; reach: number
 const LUNGE = { speed: 150, time: 0.36 };
 const SHOT = { speed: 72, life: 2.4 };
 const BOSS = { walkZ: 26, wind: 0.9, wake: 1.2, stompReach: 34, stompWind: 0.55, score: 2000, wide: 22 };
+/** Once half its health is gone the boss winds up faster and charges harder. */
+export const ANGRY = { wind: 0.7, charge: 1.15 };
 
 // ---------- setup ----------
 
@@ -119,11 +141,13 @@ function actor(world: Pick<World, 'nextId'>, role: Role, x: number, z: number, h
   return { id: world.nextId++, role, x, z, face: 1, hp, maxHp: hp, state, t: 0, combo: 0, spent: false, queued: false, cool: 0, safe: 0, flash: 0, push: 0 };
 }
 
-export function createWorld(level: Level, options: { difficulty?: Difficulty; viewW?: number; seed?: number } = {}): World {
+export function createWorld(level: Level, options: { difficulty?: Difficulty; viewW?: number; seed?: number; hero?: HeroId } = {}): World {
   const difficulty = options.difficulty ?? 'gentle';
   const world: World = {
     level,
     difficulty,
+    heroId: options.hero ?? 'bo',
+    bossAngry: false,
     viewW: options.viewW ?? 180,
     time: 0,
     cameraX: 0,
@@ -161,7 +185,7 @@ function placeFixtures(world: World) {
 
 /** After a knock-out: start again from the last checkpoint with full health. Score is kept. */
 export function retry(world: World): World {
-  const fresh = createWorld(world.level, { difficulty: world.difficulty, viewW: world.viewW, seed: world.rng });
+  const fresh = createWorld(world.level, { difficulty: world.difficulty, viewW: world.viewW, seed: world.rng, hero: world.heroId });
   fresh.score = world.score;
   fresh.wave = world.checkpoint.wave;
   fresh.checkpoint = { ...world.checkpoint };
@@ -249,6 +273,7 @@ export function step(world: World, input: Input): World {
 }
 
 function stepHero(world: World, hero: Actor, input: Input) {
+  const HERO = heroStats(world);
   const pressed = input.attack && !world.prevAttack;
   if (world.phase === 'rescue') {
     if (hero.state !== 'cheer') setState(hero, 'cheer');
@@ -274,6 +299,7 @@ function stepHero(world: World, hero: Actor, input: Input) {
       hero.combo += 1;
       hero.queued = false;
       setState(hero, 'attack');
+      world.events.push({ type: 'swing' });
       return;
     }
     hero.queued = false;
@@ -283,6 +309,7 @@ function stepHero(world: World, hero: Actor, input: Input) {
     // A new press soon after the last bonk carries the combo on. Otherwise start over.
     hero.combo = hero.combo > 0 && hero.combo < 3 && hero.t <= HERO.comboGap ? hero.combo + 1 : 1;
     setState(hero, 'attack');
+    world.events.push({ type: 'swing' });
     hero.x += hero.face * 2;
     return;
   }
@@ -312,6 +339,7 @@ function stepHero(world: World, hero: Actor, input: Input) {
 
 /** The hero's swing. Each monster in reach is bonked once. Critters, the cage and snacks are never targets. */
 function bonk(world: World, hero: Actor, damage: number, finisher: boolean) {
+  const HERO = heroStats(world);
   for (const a of [...world.actors]) {
     if (!isEnemy(a) && a.role !== 'boss') continue;
     if (a.role === 'boss' && (a.state === 'statue' || a.state === 'wake' || a.state === 'settle')) continue;
@@ -319,10 +347,14 @@ function bonk(world: World, hero: Actor, damage: number, finisher: boolean) {
     const ahead = (a.x - hero.x) * hero.face;
     if (ahead < -6 - wide || ahead > HERO.reach + wide) continue;
     if (Math.abs(a.z - hero.z) > HERO.depthReach + (a.role === 'boss' ? 4 : 0)) continue;
-    world.events.push({ type: 'bonk', x: a.x - hero.face * wide * 0.5, z: a.z, finisher });
+    world.events.push({ type: 'bonk', x: a.x - hero.face * wide * 0.5, z: a.z, finisher, boss: a.role === 'boss' });
     a.flash = 0.12;
     if (a.role === 'boss') {
       a.hp -= a.state === 'stun' ? damage * 2 : damage;
+      if (!world.bossAngry && a.hp > 0 && a.hp <= a.maxHp / 2) {
+        world.bossAngry = true;
+        world.events.push({ type: 'bossAngry' });
+      }
       if (a.hp <= 0) {
         a.hp = 0;
         world.score += BOSS.score;
@@ -341,6 +373,7 @@ function bonk(world: World, hero: Actor, damage: number, finisher: boolean) {
 }
 
 function hurtHero(world: World, hero: Actor, damage: number, from: number, push: number) {
+  const HERO = heroStats(world);
   if (hero.safe > 0 || hero.state === 'down' || world.phase === 'rescue') return;
   hero.hp = Math.max(0, hero.hp - damage);
   hero.safe = HERO.safe;
@@ -463,10 +496,13 @@ function stepBoss(world: World, boss: Actor, hero: Actor) {
       return;
     }
     case 'wind':
-      if (boss.t >= BOSS.wind * tune.wind) setState(boss, 'charge');
+      if (boss.t >= BOSS.wind * tune.wind * (world.bossAngry ? ANGRY.wind : 1)) {
+        setState(boss, 'charge');
+        world.events.push({ type: 'charge' });
+      }
       return;
     case 'charge':
-      boss.x += boss.face * tune.bossCharge * STEP;
+      boss.x += boss.face * tune.bossCharge * (world.bossAngry ? ANGRY.charge : 1) * STEP;
       if (!boss.spent && Math.abs(hero.x - boss.x) < BOSS.wide && Math.abs(hero.z - boss.z) < 9) {
         boss.spent = true;
         hurtHero(world, hero, 2, boss.x, 30);

@@ -23,6 +23,14 @@ export const PALETTE: Record<string, string> = {
   denim: '#4a78d0',
   boot: '#8a5530',
   noodle: '#ff74b0',
+  // Second hero (block 2): a tall gardener with a rake.
+  skin2: '#c98a5e',
+  hair2: '#3a2620',
+  overall: '#4fa05a',
+  sun: '#ffc94a',
+  visor: '#ff8f3a',
+  handle: '#c9955a',
+  tine: '#b8c4cc',
   // Monsters: goofy, not gory.
   zskin: '#93d06c',
   zshirt: '#c98a5a',
@@ -64,6 +72,13 @@ export const PALETTE: Record<string, string> = {
   treeNear: '#3f9a63',
   trunk: '#6a4a3a',
   fence: '#d9b98a',
+  // Frontier Lands backdrop (block 2): scrub forest at golden hour.
+  scrubFar: '#5b5f3a',
+  scrubNear: '#6f8f45',
+  cactus: '#5aa060',
+  bloom: '#ff6f7d',
+  rock: '#c2a782',
+  post: '#9a6a48',
 };
 
 export type FrameDef = { name: string; draw: (f: Fig) => void };
@@ -247,6 +262,87 @@ function heroSheet(): SheetDef {
     d({ legF: 0.3, legB: -0.3, armF: 3.1, armB: 2.9, held: 0, face: 'happy', y: -3 }),
   ]);
   return { id: 'hero', cw: 64, ch: 62, ax: 26, ay: 53, frames: b.frames, anims: b.anims };
+}
+
+/** Flor: tall and long-legged, with a sun visor, a ponytail and a garden rake. A very different outline from Bo. */
+const FLOR: Human = {
+  skin: 'skin2',
+  top: 'overall',
+  sleeve: 'sun',
+  bottom: 'overall',
+  shoe: 'boot',
+  head: [7.6, 7.2],
+  torso: [5, 13],
+  leg: 9,
+  arm: 9.5,
+  limb: 2,
+  hand: 2.3,
+  lean: 0.02,
+  face: (f, face) => {
+    if (face === 'ouch') {
+      f.px('ink', 1, 0, 3, 1).px('ink', 5, 0, 2, 1);
+      f.px('mouth', 3, 3, 2, 2);
+    } else {
+      f.px('white', 1, -2, 3, 3, 2).px('ink', 2, -1, 2, 2);
+      f.px('white', 5, -2, 2, 3, 2).px('ink', 5, -1, 1, 2);
+      f.px('ink', 1, -3, 3, 1).px('ink', 5, -3, 2, 1);
+      if (face === 'happy') f.px('mouth', 2, 2, 4, 2).px('white', 3, 2, 2, 1, 2);
+      else f.px('mouth', 3, 3, 3, 1);
+    }
+  },
+  behindHead: (f) => {
+    // Ponytail, high and bouncy, so her outline is different from Bo's hat.
+    f.cap('hair2', -6, -5, -13, -1, 2.8, { r2: 1.6 });
+  },
+  onHead: (f) => {
+    // Hair across the top and back of the head, then the visor.
+    f.poly('hair2', [-8, -1, -7, -6, -2, -8, 5, -7, 7, -4, -2, -5, -4, 2, -8, 3]);
+    f.px('visor', -6, -7, 13, 2);
+    f.poly('visor', [3, -7, 13, -6, 13, -4, 3, -5]);
+  },
+  onTorso: (f) => {
+    // Overall straps and a pocket.
+    f.px('sun', -3, -12, 6, 4);
+    f.px('ink', -3, -12, 1, 6).px('ink', 2, -12, 1, 6);
+    f.px('brass', -3, -7, 1, 1, 2).px('brass', 2, -7, 1, 1, 2);
+    f.px('ink', -2, -4, 4, 1);
+  },
+  held: (f) => {
+    f.cap('handle', 0, -4, 0, 19, 1.1);
+    // A wide rake head with five long tines, so it never reads as a hammer.
+    f.at(0, 19, 0, () =>
+      f.part(() => {
+        f.cap('tine', -7, 0, 7, 0, 1.3);
+        for (const x of [-7, -3.5, 0, 3.5, 7]) f.cap('tine', x, 0, x, 5, 0.6);
+      }),
+    );
+  },
+};
+
+/** At rest she leans on the rake, tines down in front of her: the gardener's pose. */
+const florIdle: Pose = { legF: 0.1, legB: -0.1, armF: 0.75, armB: -0.15, held: 0.35 };
+
+function florSheet(): SheetDef {
+  const b = new SheetBuilder();
+  const d = (p: Pose) => (f: Fig) => human(f, FLOR, p);
+  b.anim('idle', 3, true, [d(florIdle), d({ ...florIdle, y: 1, held: 0.4 })]);
+  // Walking, the rake rides on her shoulder.
+  b.anim('walk', 8, true, WALK.map((p) => d({ ...p, armF: 2.5, armB: p.armB, held: 0.9 })));
+  // A rake sweep, a jab, and a big overhead swing.
+  b.anim('attack1', 12, false, [d({ ...florIdle, armF: 1.9, held: 1.2, lean: -0.04 }), d({ ...florIdle, armF: 1.45, held: 0.15, lean: 0.12, x: 1 })]);
+  b.anim('attack2', 12, false, [d({ ...florIdle, armF: 0.6, held: 1.1, lean: 0.02 }), d({ ...florIdle, armF: 1.6, held: 0, lean: 0.18, x: 2 })]);
+  b.anim('attack3', 10, false, [
+    d({ ...florIdle, armF: 3.1, held: 0.2, lean: -0.16, y: -1 }),
+    d({ ...florIdle, armF: 1.3, held: 0.25, lean: 0.24, x: 2, legF: 0.45, legB: -0.4 }),
+    d({ ...florIdle, armF: 1.0, held: 0.7, lean: 0.12, x: 1 }),
+  ]);
+  b.anim('hurt', 1, false, [d({ legF: -0.3, legB: 0.2, armF: 1.7, armB: -1.0, held: 0.9, lean: -0.3, face: 'ouch', x: -1 })]);
+  b.anim('down', 1, false, [d({ legF: 0.9, legB: 0.7, armF: 1.3, armB: 0.2, held: 0.6, lean: -0.45, face: 'ouch', y: 4 })]);
+  b.anim('cheer', 5, true, [
+    d({ legF: 0.1, legB: -0.1, armF: 2.9, armB: 2.6, held: 0.1, face: 'happy' }),
+    d({ legF: 0.3, legB: -0.3, armF: 3.1, armB: 2.9, held: -0.1, face: 'happy', y: -3 }),
+  ]);
+  return { id: 'flor', cw: 84, ch: 76, ax: 34, ay: 66, frames: b.frames, anims: b.anims };
 }
 
 const ZOMBIE: Human = {
@@ -619,10 +715,50 @@ function backdropSheet(): SheetDef {
   return { id: 'backdrop', cw: W, ch: 48, ax: 0, ay: 48, frames: b.frames, anims: b.anims, tile: true };
 }
 
+/** The Frontier Lands: scrub forest at golden hour, with prickly pear, rocks and old cedar posts. */
+function frontierSheet(): SheetDef {
+  const b = new SheetBuilder();
+  const W = 128;
+  const wrap = (f: Fig, draw: () => void) => {
+    for (const dx of [-W, 0, W]) f.at(dx, 0, 0, draw);
+  };
+  const pear = (f: Fig, x: number, s: number) =>
+    f.part(() => {
+      f.ell('cactus', x, -5 * s, 4 * s, 5 * s);
+      f.ell('cactus', x - 4 * s, -11 * s, 3 * s, 4 * s, { rot: -0.4 });
+      f.ell('cactus', x + 4 * s, -12 * s, 3 * s, 4 * s, { rot: 0.4 });
+      f.px('bloom', Math.round(x - 4 * s), Math.round(-16 * s), 2, 2).px('bloom', Math.round(x + 4 * s), Math.round(-17 * s), 2, 2);
+    });
+  // Far row: low, rounded mesquite and cedar shapes in one quiet olive.
+  b.anim('far', 1, false, [
+    (f) =>
+      wrap(f, () => {
+        for (const [x, rx, ry] of [[8, 16, 10], [36, 13, 14], [62, 19, 9], [92, 14, 13], [116, 15, 10]] as const) f.ell('scrubFar', x, -ry * 0.8, rx, ry, { shade: 1 });
+        f.px('scrubFar', 0, -6, W, 6);
+      }),
+  ]);
+  // Near row: prickly pear, rocks and a leaning post-and-wire fence.
+  b.anim('near', 1, false, [
+    (f) =>
+      wrap(f, () => {
+        for (const x of [10, 52, 94]) f.part(() => f.poly('post', [x, -16, x + 3, -17, x + 4, 0, x + 1, 0]));
+        f.px('post', 0, -12, W, 1);
+        pear(f, 30, 1);
+        pear(f, 76, 0.8);
+        f.part(() => f.ell('rock', 112, -3, 8, 4));
+        f.part(() => f.ell('rock', 62, -2, 5, 3));
+        f.part(() => f.ell('scrubNear', 122, -6, 9, 6));
+        f.part(() => f.ell('scrubNear', 42, -5, 7, 5));
+      }),
+  ]);
+  return { id: 'frontier', cw: W, ch: 48, ax: 0, ay: 48, frames: b.frames, anims: b.anims, tile: true };
+}
+
 /** Every sprite sheet in the game. */
 export function allSheets(): SheetDef[] {
   return [
     heroSheet(),
+    florSheet(),
     enemySheet('shambler', ZOMBIE, [56, 56, 22, 50], 'shamble'),
     // An example of a holiday swap: the same puppet in frosty colors with a scarf.
     enemySheet('shamblerFrost', { ...ZOMBIE, onTorso: (f) => f.px('band', -5, -11, 10, 2).px('band', -5, -9, 2, 4) }, [56, 56, 22, 50], 'shamble', {
@@ -641,5 +777,6 @@ export function allSheets(): SheetDef[] {
     propsSheet(),
     fxSheet(),
     backdropSheet(),
+    frontierSheet(),
   ];
 }

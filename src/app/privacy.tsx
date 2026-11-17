@@ -1,9 +1,11 @@
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Download, Eye, EyeOff, LogIn, Trash2 } from 'lucide-react-native';
 import { router } from 'expo-router';
 import { useState } from 'react';
 import { Text, View } from 'react-native';
 
 import { Btn, Card, Choices, Notice, Screen, SectionTitle, Txt, useUI } from '@/components/ui';
+import { PROGRESS_KEY } from '@/lib/arcade/progress';
 import { useT } from '@/lib/i18n';
 import { currentAudience, type Audience, type ConsentField } from '@/lib/rules';
 import { useSession } from '@/lib/session';
@@ -90,6 +92,8 @@ export default function PrivacyScreen() {
             label={t('privacy.deleteYes')}
             onPress={() => {
               void repo.deleteMyData();
+              // Game stamps and best scores live on this phone only; delete them too.
+              AsyncStorage.removeItem(PROGRESS_KEY).catch(() => undefined);
               setConfirmDelete(false);
               setExported(undefined);
               setDeleted(true);

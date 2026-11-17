@@ -10,13 +10,19 @@ import { frameOf, GROUND_TOP, TILE_W, VIEW_H, type Scene } from '@/lib/arcade/sc
 
 import { Sprite, StageSprite, type LookId } from './sprite';
 
+type Mood = { skyTop: string; skyLow: string; glow: string; ground: string; groundLine: string; curb: string; shadow: string };
 /** One strong color mood per level (style brief). This is the dusk street. */
-export const DUSK = { skyTop: '#2b2a5c', skyLow: '#5a4a8a', glow: '#e9a37a', ground: '#4d5a78', groundLine: '#66759a', curb: '#3a4462', shadow: 'rgba(20,16,40,0.35)' };
+export const DUSK: Mood = { skyTop: '#2b2a5c', skyLow: '#5a4a8a', glow: '#e9a37a', ground: '#4d5a78', groundLine: '#66759a', curb: '#3a4462', shadow: 'rgba(20,16,40,0.35)' };
+/** The Frontier Lands: golden hour over the scrub forest, a dusty caliche trail. */
+export const FRONTIER: Mood = { skyTop: '#5b3f6e', skyLow: '#c76a52', glow: '#ffc46b', ground: '#b98a5a', groundLine: '#d4a873', curb: '#8a6240', shadow: 'rgba(60,30,20,0.32)' };
+export const MOODS: Record<string, Mood> = { dusk: DUSK, frontier: FRONTIER };
 
 export function Stage({ scene, look, scale, viewW, label }: { scene: Scene; look: LookId; scale: number; viewW: number; label: string }) {
   const tiles = Math.ceil(viewW / TILE_W) + 1;
+  const DUSK = MOODS[scene.mood] ?? MOODS.dusk;
+  const sheet = scene.backdrop;
   const row = (anim: 'far' | 'near', offset: number, bottom: number) =>
-    Array.from({ length: tiles }, (_, i) => <StageSprite key={`${anim}${i}`} sheet="backdrop" frame={frameOf('backdrop', anim, 0)} look={look} scale={scale} x={offset + i * TILE_W} y={bottom} />);
+    Array.from({ length: tiles }, (_, i) => <StageSprite key={`${anim}${i}`} sheet={sheet} frame={frameOf(sheet, anim, 0)} look={look} scale={scale} x={offset + i * TILE_W} y={bottom} />);
   return (
     <View
       accessible

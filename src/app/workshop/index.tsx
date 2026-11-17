@@ -1,4 +1,4 @@
-import { Gamepad2, Hammer, Map, Palette } from 'lucide-react-native';
+import { Gamepad2, Hammer, Map, Palette, Swords } from 'lucide-react-native';
 import { View } from 'react-native';
 
 import { Notice, RowLink, Screen, Txt } from '@/components/ui';
@@ -12,6 +12,7 @@ export default function WorkshopScreen() {
       <Txt>{t('workshop.intro')}</Txt>
       <View style={{ gap: space.sm }}>
         <RowLink icon={Palette} title={t('workshop.styles')} subtitle={t('workshop.stylesHint')} href="/workshop/styles" />
+        <RowLink icon={Swords} title={t('rescue.title')} subtitle={t('rescue.subtitle')} href="/brawler" />
         <RowLink icon={Gamepad2} title={t('workshop.street')} subtitle={t('workshop.streetHint')} href="/workshop/street" />
         <RowLink icon={Map} title={t('workshop.map')} subtitle={t('workshop.mapHint')} href="/workshop/map" />
       </View>
