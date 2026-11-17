@@ -1,6 +1,6 @@
 # STATUS (read first every session)
 
-Last updated: 2026-11-17, 1:05 AM Central, by the block 1 session, after the founder's style pick.
+Last updated: 2026-11-17, 8:10 AM Central. The block 1 chat continued on Opus after the style pick and the map test.
 
 ## Where things stand
 **First draft of the app exists, runs, and is pushed.** Repository: `grantalf/heritage-hills-app`, branch `main`. A private web preview of `main` is published at https://claude.ai/artifact/EKgQGrPRdNUZncBEsncH6v.
@@ -11,7 +11,7 @@ Last updated: 2026-11-17, 1:05 AM Central, by the block 1 session, after the fou
 
 ## Founder's answers after block 1 (2026-11-17)
 - **Style pick: look D. Thick outline, shaded color** (D-074). It is now the default on the block 1 branch. The block 1 preview link was not republished, so it still opens on look B; choose D on the Pick a look page.
-- **The paper map sample was not good enough.** The founder wants the map much more detailed and artistic, in the styles of his three references. A map drawn by code will not get there. The map's picture will be real painted artwork, with code drawing only what must be exact: labels as real text, tap targets, and road paths for travel (D-075). **The founder has not yet chosen where the artwork comes from:** an illustrator, or painted pieces from an image tool that code puts together. Until then, treat any code-drawn map (block 1's sample, block 3's world map) as a stand-in for layout and behavior only. Do not spend more time polishing code-drawn map art.
+- **The paper map sample was not good enough.** The founder wants the map much more detailed and artistic, in the styles of his three references. A map drawn by code will not get there. The map's picture will be real painted artwork, with code drawing only what must be exact: labels as real text, tap targets, and road paths for travel (D-075). **The founder chose the image tool route.** A four-picture test in Figma looked far better than the code-drawn map, but the tool cannot follow the real road layout. So the tool paints separate pieces, and code places them on the real layout (D-076). Details: `docs/MAP_ART_TEST.md` on the block 1 branch. **Blocked:** the full-size pictures cannot reach Claude's workspace (figma.com is not an allowed site); the founder needs to export them as PNGs into the Project files before about 2026-11-24. Until the art is in, treat any code-drawn map (block 1's sample, block 3's world map) as a stand-in for layout and behavior only. Do not spend more time polishing code-drawn map art.
 
 ## Current focus: the remaining Fable 5.2 time
 Read `FABLE_PLAN.md` (version 3) and `STYLE_BRIEF.md`. **Where they differ, STYLE_BRIEF.md wins.** The founder's access to Fable 5.2 ends soon. He wants that time spent on the hardest work, with sign-ups and deployment left for Opus and Sonnet. Blocks:
@@ -27,7 +27,7 @@ Read `FABLE_PLAN.md` (version 3) and `STYLE_BRIEF.md`. **Where they differ, STYL
 
 ## Done
 - Red-team review of Phase 0 (REDTEAM.md). Fourteen findings. Main changes: public-read first, no open feed in v1, three delivery waves, Texas age law added, backend decision reopened.
-- Product spec (SPEC.md), security and data design (SECURITY.md), decisions D-001 to D-075 (DECISIONS.md), game design (GAME.md).
+- Product spec (SPEC.md), security and data design (SECURITY.md), decisions D-001 to D-076 (DECISIONS.md), game design (GAME.md).
 - App, Expo SDK 58 + TypeScript:
   - Five tabs: Home, Events, Neighbors, Nature, More. About 25 screens.
   - English and Spanish everywhere. Text size control. Light and dark.
@@ -52,7 +52,7 @@ Read `FABLE_PLAN.md` (version 3) and `STYLE_BRIEF.md`. **Where they differ, STYL
 - **Pet characters, cases and patterns use sample data.** The pattern numbers are invented.
 - **The camera was not tested.** Photo choosing uses the phone's picker and could only be exercised on real devices.
 - **The Triceratops sculpture** is known only from the founder's description. No photo seen; artist and owner unknown. The game's Triceratops is our own drawing.
-- **Whether an image tool can paint map pieces good enough for the founder has not been tried.** D-075 names it as one option; test it on a few pieces before promising it.
+- **The image tool's map pieces were judged from 256-pixel previews only.** Full-size quality, cutting the pieces out, and how code-drawn roads look next to them are untested (`docs/MAP_ART_TEST.md`).
 - More block 1 limits (no sound yet, right-to-left layout, very large text on the game screen) are listed in `BLOCK1_STATUS.md`.
 
 ## Next, in order
@@ -62,7 +62,7 @@ Read `FABLE_PLAN.md` (version 3) and `STYLE_BRIEF.md`. **Where they differ, STYL
 1. Founder: open the preview, try the three looks, and say what you like and dislike. Then Claude refines one into a short brand guide (colors, type, icons, tone) for the board.
 2. Run the three reviewers on the rest of the draft as separate agents: security (`hh-privacy-security-review`), accessibility and plain language (`hh-plain-language-a11y-review`). Fix what they find.
 3. Fix native-only problems found on real phones.
-4. **Paper map artwork (D-075).** Once the founder chooses the source: get the painted artwork, lay it under the real-text labels and tap targets, and line the travel paths up with it.
+4. **Paper map artwork (D-075, D-076).** Once the full-size test pieces are in the Project files: assemble one corner as described in `docs/MAP_ART_TEST.md`, show the founder, then make the full set of pieces.
 5. Public facts pack: boundary, districts, schools, parks, transit, and Census figures for By the Numbers (Heritage Hills vs Austin vs Texas vs United States, with margins of error).
 6. Verify the ecosystem articles against City and Texas sources. Add sources and dates. Find a local reviewer (for example a Master Naturalist or Watershed Protection contact).
 7. Draft privacy policy, terms, community guidelines and moderation policy for attorney review.
@@ -73,7 +73,7 @@ Read `FABLE_PLAN.md` (version 3) and `STYLE_BRIEF.md`. **Where they differ, STYL
 12. Arabic and right-to-left check, including the game stage, controls and map.
 
 ## Blocked on a human
-- **Founder: where the paper map artwork comes from** (an illustrator, or painted pieces from an image tool). See D-075.
+- **Founder: export the four test pictures** from the Figma file "Heritage Hills paper map - image tool test" as PNGs and add them to the Project files, before about 2026-11-24. Also check how many Figma AI credits the test used.
 - Confirm the association's exact name and current officers (two names appear in public records).
 - Is the association incorporated? Get the bylaws.
 - Board approval of scope, privacy principles and who moderates.
@@ -82,7 +82,7 @@ Read `FABLE_PLAN.md` (version 3) and `STYLE_BRIEF.md`. **Where they differ, STYL
 - Blessing from the Triceratops sculpture's artist or owner (D-062).
 - Who pays recurring costs (about $415 a year: Apple $99, non-pausing database about $300, domain about $15; plus up to about $50 for portraits).
 - Attorney questions listed at the end of REDTEAM.md.
-- Attorney: does a kid-friendly game zone change the app's duties under children's privacy law and the Texas app store law (D-045)? Now also: pet photos sent to an outside AI service, and rights in style samples.
+- Attorney: does a kid-friendly game zone change the app's duties under children's privacy law and the Texas app store law (D-045)? Now also: pet photos sent to an outside AI service, rights in style samples, and Figma's terms for pictures made by its AI.
 - A local naturalist to check the field guide.
 - A native Spanish reviewer.
 - See CHECKLIST.md for accounts to create.
