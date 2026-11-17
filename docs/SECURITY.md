@@ -152,6 +152,9 @@ If only one eligible person exists, the action is blocked and the app says so. T
 - Retention: verification codes 30 days; reports one year after closing; RSVPs 90 days after the event; logs two years.
 - Real resident data never enters prompts, samples, screenshots or the repository.
 
+### Outside services the app contacts
+By default: none. One exception, and only when the person asks: tapping "Show a real photo" on an animal page makes the phone request one photo from iNaturalist (`api.inaturalist.org` for the lookup, its photo storage for the image). That site sees what any website sees (network address, device type) and which species was asked for. It receives nothing about the person, their account or their sightings. The button says so before it is tapped. The app shows a photo only from an expected https address and only with a sharing license and a credit (D-054). List this in the privacy policy.
+
 ## 11. Before any real data is collected
 - [ ] Attorney review of privacy policy, terms and guidelines
 - [ ] Access-rule tests pass for every table
