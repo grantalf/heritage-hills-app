@@ -75,6 +75,9 @@ Two honest limits are shown on the page itself:
 10. **Stewardship quests.** Finding a monarch unlocks "plant milkweed"; finding a firefly unlocks "turn off a porch light". The game hands players to the Nature section.
 11. **Neighborhood unlocks.** When the shared total reaches a goal, something real happens, such as planting a pollinator bed at the garden.
 
+## The game shell (block 3)
+Since block 3, Critter Club opens on its own title screen and its world is the storybook map: tap a place, the traveler walks there, critter hosts give quests, rescue places open Critter Rescue. See `docs/CRITTER_WORLD.md`.
+
 ## Where it lives in the code
 - Content: `src/lib/data/game-content.ts` (animals, sample pets, cases, sample habits, bingo cards)
 - Characters: `src/components/critter-art.tsx` (the drawing), `src/lib/data/game-art.ts` (each animal's traits, pet maker choices, scientific names, sizes)

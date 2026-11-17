@@ -5,11 +5,13 @@
  */
 import type { StringKey } from './en';
 import { rescueEs } from './rescue.es';
+import { questEs } from './quest.es';
 import { workshopEs } from './workshop.es';
 
 export const es: Record<StringKey, string> = {
   ...workshopEs,
   ...rescueEs,
+  ...questEs,
   'draft.banner': 'Primer borrador · Datos de ejemplo · No se envía nada',
 
   'common.back': 'Atrás',

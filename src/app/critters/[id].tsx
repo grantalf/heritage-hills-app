@@ -18,13 +18,14 @@ import { radius, space } from '@/lib/theme';
 const ZONES: Zone[] = ['yard', 'garden', 'street', 'park', 'creek', 'sky'];
 
 export default function CritterScreen() {
-  const { id } = useLocalSearchParams<{ id: string }>();
+  const { id, zone: zoneParam } = useLocalSearchParams<{ id: string; zone?: string }>();
   const { t, tl } = useT();
   const { c, round } = useUI();
   const { repo } = useSession();
   const result = useLoad(async (r) => ({ critter: await r.getCritter(id) }), id);
   const critter = result?.critter;
-  const [zone, setZone] = useState<Zone>('yard');
+  // The map's "Look around" opens this page with the place's kind of place already picked.
+  const [zone, setZone] = useState<Zone>(ZONES.includes(zoneParam as Zone) ? (zoneParam as Zone) : 'yard');
   const [photo, setPhoto] = useState<string | undefined>();
   const [photoProblem, setPhotoProblem] = useState(false);
   const [earned, setEarned] = useState<number | undefined>();

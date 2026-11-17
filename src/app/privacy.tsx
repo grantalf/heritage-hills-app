@@ -5,7 +5,9 @@ import { useState } from 'react';
 import { Text, View } from 'react-native';
 
 import { Btn, Card, Choices, Notice, Screen, SectionTitle, Txt, useUI } from '@/components/ui';
-import { PROGRESS_KEY } from '@/lib/arcade/progress';
+import { parseProgress, PROGRESS_KEY } from '@/lib/arcade/progress';
+import { parseWorld, WORLD_KEY } from '@/lib/quest/state';
+import { resetWorld } from '@/lib/quest/store';
 import { useT } from '@/lib/i18n';
 import { currentAudience, type Audience, type ConsentField } from '@/lib/rules';
 import { useSession } from '@/lib/session';
@@ -68,7 +70,11 @@ export default function PrivacyScreen() {
         kind="secondary"
         icon={Download}
         label={t('privacy.download')}
-        onPress={() => void repo.exportMyData().then((data) => setExported(JSON.stringify(data, null, 2)))}
+        onPress={() =>
+          void Promise.all([repo.exportMyData(), AsyncStorage.getItem(PROGRESS_KEY), AsyncStorage.getItem(WORLD_KEY)])
+            // Game progress kept on this phone is part of "your information" too.
+            .then(([data, rescue, world]) => setExported(JSON.stringify({ ...data, rescueGame: parseProgress(rescue), mapGame: parseWorld(world) }, null, 2)))
+        }
       />
       {exported ? (
         <Card>
@@ -94,6 +100,8 @@ export default function PrivacyScreen() {
               void repo.deleteMyData();
               // Game stamps and best scores live on this phone only; delete them too.
               AsyncStorage.removeItem(PROGRESS_KEY).catch(() => undefined);
+              // The map game's places, quests and settings (block 3) too.
+              resetWorld();
               setConfirmDelete(false);
               setExported(undefined);
               setDeleted(true);

@@ -15,16 +15,17 @@ import Svg, { Circle, Defs, Ellipse, G, Path, RadialGradient, Rect, Stop } from 
 
 import { Txt, useUI } from '@/components/ui';
 import { useT } from '@/lib/i18n';
+import { PAPER } from '@/lib/quest/paper-colors';
 
 const W = 360;
 const H = 300;
-/** Colors of the paper map. Label pairs are checked for contrast in tests/arcade-skins.test.ts. */
-export const PAPER = { paper: '#ecdcb2', paperLight: '#f6ecd0', stain: '#c9a96a', ink: '#33261a', water: '#8cc3d8', waterDeep: '#5d9fbd', grass: '#a8cf86', scrub: '#c9c27a', red: '#9b2d1f', patch: 'rgba(246,236,208,0.88)' };
+/** Colors of the paper map. They live in lib so tests can check label contrast (tests/quest-world.test.ts). */
+export { PAPER };
 
 type Pt = [number, number];
 
 /** A small repeatable wobble, so lines look inked by hand but never change between runs. */
-function wobbler(seed: number) {
+export function wobbler(seed: number) {
   let s = seed >>> 0;
   return () => {
     s = (s + 0x6d2b79f5) >>> 0;
@@ -35,7 +36,7 @@ function wobbler(seed: number) {
 }
 
 /** A smooth line through the points, each nudged a little. */
-function ink(points: Pt[], wobble = 0.9, seed = 1, close = false): string {
+export function ink(points: Pt[], wobble = 0.9, seed = 1, close = false): string {
   const r = wobbler(seed);
   const p = points.map(([x, y]) => [x + r() * wobble, y + r() * wobble] as Pt);
   const at = (i: number) => (close ? p[(i + p.length) % p.length] : p[Math.max(0, Math.min(p.length - 1, i))]);
@@ -66,7 +67,7 @@ const ROADS: Pt[][] = [
   [[114, 200], [160, 207], [212, 213], [257, 222]],
 ];
 
-function Tree({ x, y, s = 1, wash = PAPER.grass }: { x: number; y: number; s?: number; wash?: string }) {
+export function Tree({ x, y, s = 1, wash = PAPER.grass }: { x: number; y: number; s?: number; wash?: string }) {
   return (
     <G>
       <Path d={`M${x} ${y} L${x} ${y - 5 * s}`} stroke={PAPER.ink} strokeWidth={1.1} strokeLinecap="round" />
@@ -77,7 +78,7 @@ function Tree({ x, y, s = 1, wash = PAPER.grass }: { x: number; y: number; s?: n
   );
 }
 
-function Shrub({ x, y }: { x: number; y: number }) {
+export function Shrub({ x, y }: { x: number; y: number }) {
   return (
     <G>
       <Ellipse cx={x} cy={y - 2.5} rx={5} ry={3.2} fill={PAPER.scrub} opacity={0.9} />

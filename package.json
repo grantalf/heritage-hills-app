@@ -52,7 +52,8 @@
     "export:web": "expo export --platform web",
     "sprites": "node --import tsx scripts/make_sprites.mts",
     "check": "npm run typecheck && npm run lint && npm test",
-    "sounds": "node --import tsx scripts/make_sounds.mts"
+    "sounds": "node --import tsx scripts/make_sounds.mts",
+    "critters": "node --import tsx scripts/make_critter_sprites.mts"
   },
   "private": true
 }

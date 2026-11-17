@@ -46,7 +46,9 @@ with sync_playwright() as p:
     # 2b. Critter Club: a visitor can play with no account.
     page.goto(BASE + "/"); wait(1000)
     page.get_by_role("button", name="Start exploring").click(); wait(800)
-    check("game hub opens for a visitor with the first rank", has("Curious Neighbor") and has("0 points"))
+    check("game title screen opens for a visitor", has("A Heritage Hills adventure") and page.get_by_role("button", name="Start the adventure").count() == 1)
+    page.get_by_role("button", name="Start the adventure").click(); wait(1200)
+    check("the map opens with the first rank", has("Curious Neighbor") and has("0 points"))
     page.goto(BASE + "/critters/guide"); wait(800)
     page.get_by_role("button", name="Fox squirrel. Not found yet").click(); wait(800)
     check("animal page shows a fact and a draft label", has("Did you know?") and has("Draft"))
@@ -110,8 +112,8 @@ with sync_playwright() as p:
     page.goto(BASE + "/critters/tally"); wait(800)
     check("neighborhood tally adds my two sightings to the shared total", has("424"))
     check("tally has no scoreboard of people", has("We count animals, not people"))
-    page.goto(BASE + "/critters"); wait(800)
-    # 30 sightings + 10 pet + 30 case + 15 squares + 25 line = 110
+    page.goto(BASE + "/critters/quests"); wait(1000)
+    # 30 sightings + 10 pet + 30 case + 15 squares + 25 line = 110 (no quest rewards collected yet)
     check("points add up and the rank rises", has("110 points") and has("Trail Scout"))
     check("badges are earned", page.get_by_label("First Find. Earned").count() == 1 and page.get_by_label("Case Closed. Earned").count() == 1)
     page.reload(); wait(1200)
@@ -181,7 +183,7 @@ with sync_playwright() as p:
     page.get_by_role("button", name="Delete my information").click(); wait(300)
     page.get_by_role("button", name="Yes, delete it").click(); wait()
     check("delete returns the person to visitor", has("The app knows nothing about you"))
-    page.goto(BASE + "/critters"); wait(800)
+    page.goto(BASE + "/critters/quests"); wait(1000)
     check("delete also clears game progress", has("0 points"))
 
     # 9. Board: two-approver rule.
