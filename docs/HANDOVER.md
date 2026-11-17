@@ -25,6 +25,16 @@ Five sessions (blocks 1 to 5 of FABLE_PLAN.md) were started within two minutes o
 
 Merge them in that order. Each one already contains the ones before it.
 
+**Checks on `block-5-review` (2026-11-17):** 246 unit tests; browser checks 64 (`e2e_web`), 40 (`e2e_workshop`), 52 (`e2e_rescue`), 105 (`e2e_world`), 118 (`e2e_cards`). All pass.
+
+**Things the next session must know:**
+- **Demo switch.** `expo.extra.demo` in app.json must be `true` for previews. With it off, the app stops at start-up on purpose (`src/lib/demo.ts`), until the real backend exists (T-10).
+- **After changing app.json, export with `--clear`.** Otherwise the web build keeps the old settings (block 5 lost time to this).
+- **Text lookup without phone code:** `src/lib/i18n/translate.ts`, so tests can check wording.
+- **Notices after an action** use `<Notice announce ...>` so screen readers say them. Use it for any new "sent", "saved", "reported" or "deleted" message.
+- **Words people type** go through `checkText` (or `petTextProblems`, `shareTextProblems`) on the form and in the store.
+- **Anything drawn on parchment** gets the zone colors through `Parchment` or `ParchmentColors` (`src/components/arcade/menu.tsx`).
+
 ## 3. Facts checked on 2026-11-17 (re-check before relying on them)
 
 | Topic | What is true today | Source |
@@ -63,10 +73,10 @@ Each brief has: what to type, what to read, steps, and how to know it is done. "
 - **How:** copy the reviewer instructions from REVIEW_BLOCK5.md section 7 ("How the reviews were run"). Give them the open findings and the backend requirements as the test list.
 - **Done when:** no open High finding; every backend requirement has a passing test.
 
-### T-03. Finish the open findings from the block 5 review
+### T-03. Finish the open findings from the block 5 review (after T-01)
 - **Type:** `Continue from STATUS.md. Do HANDOVER.md task T-03. Work unattended.`
 - **Model:** Sonnet for wording and labels; Opus for anything marked "needs backend".
-- **Read:** REVIEW_BLOCK5.md, "Open findings".
+- **Read:** REVIEW_BLOCK5.md, "Open findings", and the two reports in `docs/reviews/` for file and line details and suggested rewrites.
 - **Done when:** each open finding is fixed, or has a decision in DECISIONS.md saying why not.
 
 ### T-04. Try it on real phones, then fix what breaks
@@ -120,7 +130,7 @@ Each brief has: what to type, what to read, steps, and how to know it is done. "
 - **Type:** `Continue from STATUS.md. Do HANDOVER.md task T-10. Work unattended.`
 - **Model:** Opus. This is the highest-risk build left.
 - **Before starting:** T-09 decided, the association's accounts exist (CHECKLIST.md), and the board has approved the privacy principles.
-- **Steps:** follow SECURITY.md. Write the access rules first, with a test for each rule that proves the wrong person is refused. Email code sign-in (D-025). Household code verification (D-026). Consent ledger. Export and delete. Two-person rule enforced on the server. Sample data kept out of the store build (D-013). Then run T-02's security reviewer again on the backend.
+- **Steps:** follow SECURITY.md and the backend requirements B-1 to B-23 in `docs/reviews/2026-11-17-security-privacy.md` section 4. Write the access rules first, with a test for each rule that proves the wrong person is refused. Email code sign-in (D-025). Household code verification (D-026). Consent ledger. Export and delete. Two-person rule enforced on the server. Sample data kept out of the store build (D-013): add the real repository in `src/lib/data/provider.tsx`, chosen when `DEMO` is false. Then run T-02's security reviewer again on the backend.
 - **Done when:** every "needs backend" finding in REVIEW_BLOCK5.md is closed and every rule in SECURITY.md has a passing test.
 - **Stop for the human:** creating accounts, anything that costs money, loading any real resident data.
 
@@ -168,3 +178,5 @@ Each brief has: what to type, what to read, steps, and how to know it is done. "
 7. Reference pictures are for discussion only. Never ship them or give them to an image service.
 8. Add to STATUS.md and DECISIONS.md. Read them again right before writing, because another session may have changed them.
 9. Stop for: accounts, payments, legal sign-off, board approval, anything that cannot be undone.
+10. Keep everything pretend behind the one demo switch (`src/lib/demo.ts`). Never ship with `expo.extra.demo` set to true.
+11. Run one block session at a time. Five at once worked out this time only because each session moved onto the previous block's branch.
