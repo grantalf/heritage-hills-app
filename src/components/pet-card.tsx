@@ -115,6 +115,8 @@ export function StatStepper({ id, value, onChange }: { id: StatId; value: number
       <Pressable
         accessibilityRole="button"
         accessibilityLabel={t(delta < 0 ? 'cards.statLess' : 'cards.statMore', { stat })}
+        // Says the new number after each press (block 5 review).
+        accessibilityValue={{ min: STAT_MIN, max: STAT_MAX, now: value, text: t('cards.statNow', { stat, value, max: STAT_MAX }) }}
         accessibilityState={{ disabled }}
         aria-disabled={disabled}
         disabled={disabled}
@@ -128,7 +130,7 @@ export function StatStepper({ id, value, onChange }: { id: StatId; value: number
     <View style={{ gap: 4 }}>
       <View style={{ flexDirection: 'row', alignItems: 'center', gap: space.sm, flexWrap: 'wrap' }}>
         {button(-1)}
-        <View style={{ flexShrink: 1 }}>
+        <View style={{ flexShrink: 1 }} accessibilityLiveRegion="polite">
           <StatBar id={id} value={value} />
         </View>
         {button(1)}

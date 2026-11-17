@@ -58,6 +58,11 @@ export function PrefsProvider({ children }: { children: ReactNode }) {
     };
   }, []);
 
+  // On the web, tell browsers and screen readers which language the page is in (WCAG 3.1.1; block 5 review).
+  useEffect(() => {
+    if (typeof document !== 'undefined' && document.documentElement) document.documentElement.lang = prefs.language;
+  }, [prefs.language]);
+
   const value = useMemo<PrefsContext>(() => {
     const save = (next: Prefs) => {
       setPrefs(next);

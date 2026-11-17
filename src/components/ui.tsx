@@ -8,8 +8,9 @@
  */
 import { router, type Href } from 'expo-router';
 import { ChevronLeft, ChevronRight, Circle, CircleCheck, ExternalLink, type LucideIcon } from 'lucide-react-native';
-import { createContext, useContext, type ReactNode } from 'react';
+import { createContext, useContext, useEffect, type ReactNode } from 'react';
 import {
+  AccessibilityInfo,
   I18nManager,
   Linking,
   Platform,
@@ -29,6 +30,7 @@ import {
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { useT } from '@/lib/i18n';
+import { isSafeLink } from '@/lib/links';
 import { usePrefs } from '@/lib/prefs';
 import { fontSize, LOOKS, MAX_CONTENT_WIDTH, MIN_TOUCH, radius, space, type Palette } from '@/lib/theme';
 
@@ -123,6 +125,10 @@ export function Screen({
   const { c } = useUI();
   const { t } = useT();
   const insets = useSafeAreaInsets();
+  // Each web page gets its own title, for browser tabs, history and screen readers (WCAG 2.4.2; block 5 review, A-03).
+  useEffect(() => {
+    if (Platform.OS === 'web' && typeof document !== 'undefined') document.title = `${title} · Heritage Hills`;
+  }, [title]);
   return (
     <View style={{ flex: 1, backgroundColor: c.background }}>
       <View style={{ backgroundColor: c.sample, paddingTop: insets.top }}>
@@ -312,6 +318,7 @@ export function Btn({
 }
 
 export function LinkBtn({ label, url }: { label: string; url: string }) {
+  if (!isSafeLink(url)) return null;
   return <Btn kind="secondary" icon={ExternalLink} label={label} onPress={() => void Linking.openURL(url).catch(() => undefined)} />;
 }
 
@@ -338,19 +345,31 @@ export function Notice({
   body,
   tone = 'notice',
   children,
+  announce = false,
 }: {
   icon: LucideIcon;
   title: string;
   body?: string;
   tone?: 'urgent' | 'notice' | 'good' | 'primary';
   children?: ReactNode;
+  /** Set on notices that appear after an action (sent, saved, reported, deleted), so screen readers say them (WCAG 4.1.3; block 5 review, A-01). */
+  announce?: boolean;
 }) {
   const { c, round } = useUI();
+  const spoken = body ? `${title}. ${body}` : title;
+  useEffect(() => {
+    if (announce) AccessibilityInfo.announceForAccessibility(spoken);
+    // Said once, when the notice appears.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [announce]);
   const bg = { urgent: c.urgentSoft, notice: c.noticeSoft, good: c.goodSoft, primary: c.primarySoft }[tone];
   const fg = { urgent: c.urgent, notice: c.notice, good: c.good, primary: c.primary }[tone];
   const Icon = icon;
   return (
-    <View style={{ backgroundColor: bg, borderRadius: round(radius.lg), padding: space.lg, gap: space.sm, borderStartWidth: 5, borderStartColor: fg }}>
+    <View
+      accessibilityRole={announce && tone === 'urgent' ? 'alert' : undefined}
+      accessibilityLiveRegion={announce ? (tone === 'urgent' ? 'assertive' : 'polite') : undefined}
+      style={{ backgroundColor: bg, borderRadius: round(radius.lg), padding: space.lg, gap: space.sm, borderStartWidth: 5, borderStartColor: fg }}>
       <View style={{ flexDirection: 'row', gap: space.sm, alignItems: 'flex-start' }}>
         <Icon color={fg} size={24} />
         <Txt variant="lead" style={{ flex: 1 }}>

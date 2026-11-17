@@ -14,6 +14,8 @@ export default function TabsLayout() {
     <Tabs style={{ flex: 1, backgroundColor: c.background }}>
       <TabSlot style={{ flex: 1 }} />
       <TabList
+        // Screen readers then say "tab 2 of 5" (block 5 review, A-07).
+        accessibilityRole="tablist"
         style={{
           flexDirection: 'row',
           justifyContent: 'space-around',
@@ -44,7 +46,7 @@ export default function TabsLayout() {
 }
 
 function TabButton({ icon: Icon, label, isFocused, ...props }: TabTriggerSlotProps & { icon: LucideIcon; label: string }) {
-  const { c } = useUI();
+  const { c, fs } = useUI();
   const color = isFocused ? c.primary : c.textSecondary;
   return (
     <Pressable
@@ -71,10 +73,11 @@ function TabButton({ icon: Icon, label, isFocused, ...props }: TabTriggerSlotPro
         }}>
         <Icon color={color} size={24} strokeWidth={isFocused ? 2.5 : 2} />
       </View>
+      {/* Follows the text size setting and wraps to two lines instead of being cut off (block 5 review, A-06, A-24). */}
       <Text
-        numberOfLines={1}
-        maxFontSizeMultiplier={1.3}
-        style={{ color, fontSize: 13, fontWeight: isFocused ? '700' : '600' }}>
+        numberOfLines={2}
+        maxFontSizeMultiplier={1.6}
+        style={{ color, fontSize: fs('small') - 1, lineHeight: (fs('small') - 1) * 1.2, fontWeight: isFocused ? '700' : '600', textAlign: 'center' }}>
         {label}
       </Text>
     </Pressable>

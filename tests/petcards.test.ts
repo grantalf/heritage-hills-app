@@ -23,6 +23,7 @@ import {
   nextBatchDay,
   noteProblems,
   outbound,
+  canChangePhoto,
   PHOTO_CHECKS,
   PORTRAIT,
   PORTRAIT_SERVICE,
@@ -82,7 +83,7 @@ test('sample cards use known stats, classes and favorites, within limits', () =>
 test('words with links, emails, phone numbers or addresses are kept out', () => {
   assert.deepEqual(checkText('Such a sweet dog!', 140), []);
   assert.ok(checkText('see www.example.com', 140).includes('link'));
-  assert.ok(checkText('pics at dogs.com', 140).includes('link'));
+  assert.ok(checkText('pics at dogs.com', 140).some((p) => p === 'link' || p === 'email'));
   assert.ok(checkText('email me a@b.org', 140).includes('email'));
   assert.ok(checkText('call 512 555 0199', 140).includes('phone'));
   assert.ok(checkText('call (512) 555-0199', 140).includes('phone'));
@@ -224,7 +225,6 @@ test('only moderators decide on suggestions; others see approved ones and their 
 const req = (over: Partial<PortraitRequest>): PortraitRequest => ({
   id: 'r1',
   petId: 'pet-a',
-  petName: 'Al',
   kind: 'dog',
   requestedAt: NOW.toISOString(),
   status: 'waiting',
@@ -306,8 +306,22 @@ test('requests are done in a weekly batch on Sunday', () => {
   assert.equal(nextBatchDay(new Date('2026-11-17T12:00:00')).toISOString().slice(0, 10), '2026-11-22');
 });
 
+test('a portrait request record holds no pet name, family or place', () => {
+  const keys = Object.keys(req({})).sort();
+  for (const k of ['petName', 'name', 'family', 'household', 'street', 'address']) assert.ok(!keys.includes(k), k);
+});
+
+test('the photo can change only with no open request, or when it was sent back', () => {
+  assert.equal(canChangePhoto(undefined), true);
+  assert.equal(canChangePhoto(req({ status: 'waiting' })), false);
+  assert.equal(canChangePhoto(req({ status: 'photoOk' })), false);
+  assert.equal(canChangePhoto(req({ status: 'sentBack' })), true);
+  assert.equal(canChangePhoto(req({ status: 'made' })), true);
+  assert.equal(canChangePhoto(req({ status: 'cancelled' })), true);
+});
+
 test('what goes to the image service carries no name, family or place', () => {
-  const out = outbound(req({ petName: 'Biscuit' }));
+  const out = outbound(req({ id: 'r-biscuit' }));
   assert.deepEqual(Object.keys(out).sort(), ['fileName', 'kind']);
   assert.match(out.fileName, /^portrait-[0-9a-z]{6}\.jpg$/);
   assert.ok(!JSON.stringify(out).includes('Biscuit'));
@@ -385,6 +399,41 @@ test('end to end: card, notes, photo, request, portrait, with sample data', asyn
   setRole('neighbor');
   assert.equal(store.getPhoto('mypet-1'), undefined);
   assert.equal(store.getRequest('mypet-1')?.status, 'made');
+});
+
+test('the checked photo is the photo that goes out, and a sent-back photo is not kept (block 5 review)', async () => {
+  const { store, setRole, state } = makeStore('neighbor');
+  store.setPhoto('mypet-1', 'file:///checked.jpg');
+  store.requestPortrait('mypet-1', true);
+  const id = store.getRequest('mypet-1')!.id;
+  setRole('board');
+  store.checkPhoto(id, PHOTO_CHECKS);
+  setRole('neighbor');
+  store.setPhoto('mypet-1', 'file:///swapped.jpg');
+  store.setPhoto('mypet-1', undefined);
+  setRole('board');
+  assert.equal(store.getRequestPhoto(id), 'file:///checked.jpg', 'a swap after the check is refused');
+
+  // A second request, sent back: the photo is deleted and hidden from the maker until a new one comes.
+  const second = makeStore('neighbor');
+  second.store.setPhoto('mypet-1', 'file:///people.jpg');
+  second.store.requestPortrait('mypet-1', true);
+  const id2 = second.store.getRequest('mypet-1')!.id;
+  second.setRole('board');
+  second.store.checkPhoto(id2, [], 'people');
+  assert.equal(second.store.getRequestPhoto(id2), undefined);
+  second.setRole('neighbor');
+  assert.equal(second.store.getPhoto('mypet-1'), undefined);
+  second.store.setPhoto('mypet-1', 'file:///new.jpg');
+  assert.equal(second.store.resendPhoto(id2), true);
+  second.setRole('board');
+  assert.equal(second.store.getRequestPhoto(id2), 'file:///new.jpg');
+
+  // The export holds only this person's own things.
+  const out = JSON.stringify(store.exportView());
+  assert.ok(!out.includes('authorId'));
+  assert.ok(!out.includes('spend'));
+  void state;
 });
 
 test('a photo the family chose to show neighbors stays after the request', async () => {

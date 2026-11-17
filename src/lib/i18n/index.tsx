@@ -1,19 +1,11 @@
 import { useMemo } from 'react';
 
 import type { L } from '../data/types';
-import { usePrefs, type Language } from '../prefs';
-import { en, type StringKey } from './en';
-import { es } from './es';
+import { usePrefs } from '../prefs';
+import type { StringKey } from './en';
+import { translate } from './translate';
 
-export const dictionaries: Record<Language, Record<StringKey, string>> = { en, es };
-
-export function translate(language: Language, key: StringKey, vars?: Record<string, string | number>): string {
-  let text = dictionaries[language][key] ?? en[key] ?? key;
-  if (vars) {
-    for (const [name, value] of Object.entries(vars)) text = text.split('{' + name + '}').join(String(value));
-  }
-  return text;
-}
+export { dictionaries, translate } from './translate';
 
 export function useT() {
   const { language } = usePrefs();

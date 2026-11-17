@@ -3,6 +3,7 @@ import { View } from 'react-native';
 
 import { Card, Choices, RowLink, Screen, SectionTitle, Txt } from '@/components/ui';
 import type { DemoRole } from '@/lib/data/types';
+import { DEMO } from '@/lib/demo';
 import { useT } from '@/lib/i18n';
 import { useSession } from '@/lib/session';
 import { space } from '@/lib/theme';
@@ -15,6 +16,7 @@ export default function MoreScreen() {
 
   return (
     <Screen back={false} title={t('more.title')}>
+      {DEMO ? (
       <Card>
         <Txt variant="lead">{t('more.demoTitle')}</Txt>
         <Txt variant="small" tone="secondary">
@@ -30,6 +32,7 @@ export default function MoreScreen() {
           {t(`role.${role}.can`)}
         </Txt>
       </Card>
+      ) : null}
 
       {isBoard ? <RowLink icon={Megaphone} tone="notice" title={t('board.title')} subtitle={t('board.subtitle')} href="/board" /> : null}
       {isBoard ? <RowLink icon={Brush} tone="notice" title={t('maker.boardRow')} subtitle={t('maker.boardRowHint')} href="/portraits" /> : null}
@@ -42,7 +45,7 @@ export default function MoreScreen() {
         <RowLink icon={Sparkles} title={t('capital.title')} subtitle={t('capital.subtitle')} href="/capital" />
         <RowLink icon={HandHeart} title={t('help.title')} subtitle={t('help.subtitle')} href="/help" />
         <RowLink icon={Swords} title={t('rescue.title')} subtitle={t('rescue.subtitle')} href="/brawler" />
-        <RowLink icon={Gamepad2} title={t('workshop.title')} subtitle={t('workshop.subtitle')} href="/workshop" />
+        {DEMO ? <RowLink icon={Gamepad2} title={t('workshop.title')} subtitle={t('workshop.subtitle')} href="/workshop" /> : null}
       </View>
 
       <SectionTitle>{t('more.app')}</SectionTitle>

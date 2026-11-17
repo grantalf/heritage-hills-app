@@ -2,6 +2,8 @@ import type { rescueEn } from './rescue.en';
 
 /** Rescate de Animalitos. Escrito por Claude: necesita revisión de una persona hispanohablante del vecindario. */
 export const rescueEs: Record<keyof typeof rescueEn, string> = {
+  'rescue.stampEarned': 'rescatado',
+  'rescue.stampNotYet': 'todavía no',
   'rescue.title': 'Rescate de Animalitos',
   'rescue.subtitle': 'Un juego corto de arcade. Péguele a los monstruos y libere a los animalitos.',
   'rescue.sign': 'Rescate de Animalitos',
@@ -56,7 +58,7 @@ export const rescueEs: Record<keyof typeof rescueEn, string> = {
   'rescue.learnMore': 'Verlo en la guía de campo',
   'rescue.playAgain': 'Jugar otra vez',
   'rescue.backToTitle': 'Volver al inicio',
-  'rescue.lostTitle': 'Derribado',
+  'rescue.lostTitle': '¡Al suelo!',
   'rescue.lostBody': 'No pasó nada. Empiece otra vez desde el último lugar despejado. Su puntaje se queda.',
   'rescue.tryAgain': 'Intentar otra vez',
   'rescue.paused': 'En pausa',

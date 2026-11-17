@@ -29,13 +29,14 @@ export default function PetCardScreen() {
   const [problems, setProblems] = useState<NoteProblem[]>([]);
   const [sent, setSent] = useState(false);
   const [reported, setReported] = useState(false);
+  const [confirmRemove, setConfirmRemove] = useState(false);
 
   if (!pet) {
     // Two reports hide a card right away, so the reporter sees a thank-you instead of the card.
     if (reported) {
       return (
         <Screen title={t('critters.pets')}>
-          <Notice tone="good" icon={Check} title={t('cards.reportedTitle')} body={t('cards.reportedBody')} />
+          <Notice announce tone="good" icon={Check} title={t('cards.reportedTitle')} body={t('cards.reportedBody')} />
           <Btn label={t('critters.pets')} onPress={() => router.replace('/critters/pets')} />
         </Screen>
       );
@@ -185,16 +186,17 @@ export default function PetCardScreen() {
             maxLength={LIMITS.note}
             style={{ minHeight: 96, textAlignVertical: 'top' }}
           />
-          <Txt variant="small" tone="secondary">
+          {/* Read out only when few letters are left, so every key press is not announced (block 5 review). */}
+          <Txt variant="small" tone="secondary" accessibilityLiveRegion={LIMITS.note - text.length <= 20 ? 'polite' : 'none'}>
             {t('cards.noteLeft', { count: LIMITS.note - text.length })}
           </Txt>
           {problems.map((p) => (
-            <Txt key={p} tone="urgent">
+            <Txt key={p} tone="urgent" accessibilityLiveRegion="assertive">
               {t(`cards.problem.${p}`)}
             </Txt>
           ))}
           <Btn kind="secondary" icon={Send} label={t('cards.noteSend')} disabled={text.trim().length < LIMITS.noteMin} onPress={send} />
-          {sent || notes.mineWaiting > 0 ? <Notice tone="good" icon={Check} title={t('cards.noteSentTitle')} body={t('cards.noteSentBody')} /> : null}
+          {sent || notes.mineWaiting > 0 ? <Notice announce tone="good" icon={Check} title={t('cards.noteSentTitle')} body={t('cards.noteSentBody')} /> : null}
         </>
       )}
 
@@ -222,20 +224,28 @@ export default function PetCardScreen() {
               </Ink>
             </Parchment>
           ) : null}
-          <Btn
-            kind="danger"
-            icon={Trash2}
-            label={t('critters.removePet')}
-            onPress={() => {
-              void repo.removePet(pet.id);
-              router.back();
-            }}
-          />
+          {/* Removing a pet deletes its card, notes, photo and portrait, so ask first (block 5 review). */}
+          {!confirmRemove ? (
+            <Btn kind="danger" icon={Trash2} label={t('critters.removePet')} onPress={() => setConfirmRemove(true)} />
+          ) : (
+            <Notice announce tone="urgent" icon={Trash2} title={t('critters.removePetConfirmTitle', { name: pet.name })} body={t('critters.removePetConfirmBody')}>
+              <Btn
+                kind="danger"
+                icon={Trash2}
+                label={t('critters.removePetYes')}
+                onPress={() => {
+                  void repo.removePet(pet.id);
+                  router.back();
+                }}
+              />
+              <Btn kind="quiet" label={t('common.cancel')} onPress={() => setConfirmRemove(false)} />
+            </Notice>
+          )}
         </>
       ) : (
         <>
           {reported || repo.hasReported(pet.id) ? (
-            <Notice tone="good" icon={Check} title={t('cards.reportedTitle')} body={t('cards.reportedBody')} />
+            <Notice announce tone="good" icon={Check} title={t('cards.reportedTitle')} body={t('cards.reportedBody')} />
           ) : (
             <Btn
               kind="quiet"

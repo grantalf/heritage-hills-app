@@ -1,12 +1,17 @@
 import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from 'react';
 
 import type { Repository } from './repository';
+import { DEMO, NOT_READY_MESSAGE } from '../demo';
 import { SampleRepository } from './sample';
 
 const Ctx = createContext<Repository | undefined>(undefined);
 
 export function RepoProvider({ children }: { children: ReactNode }) {
-  const repo = useMemo<Repository>(() => new SampleRepository(), []);
+  const repo = useMemo<Repository>(() => {
+    // Sample data, pretend sign-in and pretend second people exist only in demo builds.
+    if (!DEMO) throw new Error(NOT_READY_MESSAGE);
+    return new SampleRepository();
+  }, []);
   useEffect(() => {
     void repo.ready();
   }, [repo]);

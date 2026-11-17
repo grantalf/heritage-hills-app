@@ -8,7 +8,9 @@ import { Btn, Card, Choices, Notice, Screen, SectionTitle, Txt, useUI } from '@/
 import { parseProgress, PROGRESS_KEY } from '@/lib/arcade/progress';
 import { parseWorld, WORLD_KEY } from '@/lib/quest/state';
 import { resetWorld } from '@/lib/quest/store';
+import { shortDay } from '@/lib/dates';
 import { useT } from '@/lib/i18n';
+import { usePrefs } from '@/lib/prefs';
 import { currentAudience, type Audience, type ConsentField } from '@/lib/rules';
 import { useSession } from '@/lib/session';
 import { space } from '@/lib/theme';
@@ -17,7 +19,8 @@ const FIELDS: ConsentField[] = ['firstName', 'block', 'contact', 'rsvpName'];
 const AUDIENCES: Audience[] = ['nobody', 'coordinator', 'neighbors'];
 
 export default function PrivacyScreen() {
-  const { t } = useT();
+  const { t, language } = useT();
+  const prefs = usePrefs();
   const { c, fs } = useUI();
   const { repo, isNeighbor } = useSession();
   const ledger = repo.getConsentLedger();
@@ -62,6 +65,12 @@ export default function PrivacyScreen() {
           <Txt variant="small" tone="secondary">
             {t('privacy.history', { count: ledger.length })}
           </Txt>
+          {/* The record itself, newest first, as the line above promises (block 5 review). */}
+          {[...ledger].reverse().map((row, i) => (
+            <Txt key={row.at + i} variant="small">
+              {t('privacy.historyRow', { date: shortDay(row.at, language), field: t(`privacy.field.${row.field}`), audience: t(`privacy.audience.${row.audience}`) })}
+            </Txt>
+          ))}
         </>
       )}
 
@@ -73,7 +82,16 @@ export default function PrivacyScreen() {
         onPress={() =>
           void Promise.all([repo.exportMyData(), AsyncStorage.getItem(PROGRESS_KEY), AsyncStorage.getItem(WORLD_KEY)])
             // Game progress kept on this phone is part of "your information" too.
-            .then(([data, rescue, world]) => setExported(JSON.stringify({ ...data, rescueGame: parseProgress(rescue), mapGame: parseWorld(world) }, null, 2)))
+            .then(([data, rescue, world]) =>
+              setExported(
+                JSON.stringify(
+                  // Display settings kept on this phone are listed too, so nothing stored is left out (block 5 review).
+                  { ...data, rescueGame: parseProgress(rescue), mapGame: parseWorld(world), settingsOnThisPhone: { language: prefs.language, textSize: prefs.textScale, look: prefs.look } },
+                  null,
+                  2,
+                ),
+              ),
+            )
         }
       />
       {exported ? (
@@ -87,11 +105,11 @@ export default function PrivacyScreen() {
         </Card>
       ) : null}
 
-      {deleted ? <Notice tone="good" icon={Trash2} title={t('privacy.deletedTitle')} body={t('privacy.deletedBody')} /> : null}
+      {deleted ? <Notice announce tone="good" icon={Trash2} title={t('privacy.deletedTitle')} body={t('privacy.deletedBody')} /> : null}
       {!confirmDelete ? (
         <Btn kind="danger" icon={Trash2} label={t('privacy.delete')} onPress={() => setConfirmDelete(true)} />
       ) : (
-        <Notice tone="urgent" icon={Trash2} title={t('privacy.deleteConfirmTitle')} body={t('privacy.deleteConfirmBody')}>
+        <Notice announce tone="urgent" icon={Trash2} title={t('privacy.deleteConfirmTitle')} body={t('privacy.deleteConfirmBody')}>
           <Btn
             kind="danger"
             icon={Trash2}

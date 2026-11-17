@@ -39,8 +39,8 @@
       [
         "expo-image-picker",
         {
-          "photosPermission": "Lets you add your own animal photos to the Critter Club game.",
-          "cameraPermission": "Lets you photograph animals for the Critter Club game.",
+          "photosPermission": "Lets you add animal photos to Critter Club, and a photo of your pet if you ask for a pet portrait. A photo leaves your phone only if you ask.",
+          "cameraPermission": "Lets you photograph animals for Critter Club, and your pet if you ask for a pet portrait. A photo leaves your phone only if you ask.",
           "microphonePermission": false
         }
       ]
@@ -50,7 +50,8 @@
       "reactCompiler": false
     },
     "extra": {
-      "supportsRTL": true
+      "supportsRTL": true,
+      "demo": true
     }
   }
 }

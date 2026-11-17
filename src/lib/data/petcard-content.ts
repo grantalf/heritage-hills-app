@@ -106,7 +106,6 @@ export const sampleRegulars: Regular[] = [
 export const sampleRequest = (now: Date): PortraitRequest => ({
   id: 'req-sample-pepper',
   petId: 'pet-pepper',
-  petName: 'Pepper',
   kind: 'dog',
   requestedAt: new Date(now.getTime() - 3 * 86_400_000).toISOString(),
   status: 'waiting',

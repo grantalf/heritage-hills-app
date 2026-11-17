@@ -170,7 +170,7 @@ with sync_playwright() as p:
     check("poll shows totals after voting", has("your choice"))
     page.goto(BASE + "/decisions"); wait(800)
     page.get_by_role("button", name="Check the record").click(); wait()
-    check("decision record verifies", has("All 3 entries are intact"))
+    check("decision record verifies", has("No entry was changed (entries 1 to 3)"))
 
     # 8. Privacy: default is nobody, can change, can delete.
     page.goto(BASE + "/privacy"); wait(800)

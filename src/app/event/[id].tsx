@@ -55,7 +55,7 @@ export default function EventScreen() {
       <View style={{ gap: space.sm }}>
         <Txt variant="title">{t('events.rsvpTitle')}</Txt>
         {rsvp ? (
-          <Notice tone="good" icon={Check} title={rsvp === 'going' ? t('events.youAreGoing') : t('events.youMightGo')}>
+          <Notice announce tone="good" icon={Check} title={rsvp === 'going' ? t('events.youAreGoing') : t('events.youMightGo')}>
             <Btn kind="quiet" label={t('events.undoRsvp')} onPress={() => void repo.setRsvp(event.id, undefined)} />
           </Notice>
         ) : (

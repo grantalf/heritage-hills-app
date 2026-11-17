@@ -9,6 +9,7 @@ import { Btn, Card, Choices, Field, Notice, Screen, Txt } from '@/components/ui'
 import { buildPetArt, EAR_IDS, FUR_IDS, MARK_IDS, type EarId, type FurId, type MarkId } from '@/lib/data/game-art';
 import type { PetKind } from '@/lib/data/game-types';
 import { useT } from '@/lib/i18n';
+import { petTextProblems, PET_TEXT } from '@/lib/petcards';
 import { useSession } from '@/lib/session';
 
 const KINDS: PetKind[] = ['dog', 'cat', 'other'];
@@ -24,7 +25,9 @@ export default function NewPetScreen() {
   const [ears, setEars] = useState<EarId>('floppy');
   const [mark, setMark] = useState<MarkId>('none');
   const art = buildPetArt(kind, fur, ears, mark);
-  const ready = name.trim().length >= 2 && about.trim().length >= 5;
+  // The same word check as pet cards: no links, contacts, addresses or our street names (block 5 review).
+  const problems = petTextProblems({ name, about, hello });
+  const ready = name.trim().length >= 2 && about.trim().length >= 5 && problems.length === 0;
 
   return (
     <Screen
@@ -59,9 +62,14 @@ export default function NewPetScreen() {
         <Txt variant="label">{t('critters.makerMark')}</Txt>
         <Choices label={t('critters.makerMark')} value={mark} onChange={setMark} options={MARK_IDS.map((m) => ({ value: m, label: t(`critters.mark.${m}`) }))} />
       </Card>
-      <Field label={t('critters.petNameLabel')} value={name} onChangeText={setName} maxLength={30} />
-      <Field label={t('critters.petAboutLabel')} hint={t('critters.petAboutHint')} value={about} onChangeText={setAbout} maxLength={120} />
-      <Field label={t('critters.petHelloLabel')} hint={t('critters.petHelloHint')} value={hello} onChangeText={setHello} maxLength={120} />
+      <Field label={t('critters.petNameLabel')} value={name} onChangeText={setName} maxLength={PET_TEXT.name} />
+      <Field label={t('critters.petAboutLabel')} hint={t('critters.petAboutHint')} value={about} onChangeText={setAbout} maxLength={PET_TEXT.about} />
+      <Field label={t('critters.petHelloLabel')} hint={t('critters.petHelloHint')} value={hello} onChangeText={setHello} maxLength={PET_TEXT.hello} />
+      {problems.map((p) => (
+        <Txt key={p} tone="urgent" accessibilityLiveRegion="assertive">
+          {t(`cards.problem.${p}`)}
+        </Txt>
+      ))}
     </Screen>
   );
 }

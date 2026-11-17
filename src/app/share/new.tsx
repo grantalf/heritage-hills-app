@@ -5,6 +5,7 @@ import { useState } from 'react';
 import { Btn, Choices, Field, Screen, Txt } from '@/components/ui';
 import type { ShareCategory } from '@/lib/data/types';
 import { useT } from '@/lib/i18n';
+import { shareTextProblems, SHARE_TEXT } from '@/lib/petcards';
 import { useSession } from '@/lib/session';
 
 const CATEGORIES: ShareCategory[] = ['tool', 'book', 'toy'];
@@ -15,7 +16,9 @@ export default function NewShareItemScreen() {
   const [category, setCategory] = useState<ShareCategory>('tool');
   const [title, setTitle] = useState('');
   const [condition, setCondition] = useState('');
-  const ready = title.trim().length >= 3;
+  // No links, contacts, addresses or our street names in what neighbors will read (block 5 review).
+  const problems = shareTextProblems({ title, condition });
+  const ready = title.trim().length >= 3 && problems.length === 0;
 
   return (
     <Screen
@@ -39,8 +42,13 @@ export default function NewShareItemScreen() {
         onChange={setCategory}
         options={CATEGORIES.map((c) => ({ value: c, label: t(`share.category.${c}`) }))}
       />
-      <Field label={t('share.nameLabel')} hint={t('share.nameHint')} value={title} onChangeText={setTitle} maxLength={60} />
-      <Field label={t('share.conditionLabel')} hint={t('share.conditionHint')} value={condition} onChangeText={setCondition} maxLength={60} />
+      <Field label={t('share.nameLabel')} hint={t('share.nameHint')} value={title} onChangeText={setTitle} maxLength={SHARE_TEXT.title} />
+      <Field label={t('share.conditionLabel')} hint={t('share.conditionHint')} value={condition} onChangeText={setCondition} maxLength={SHARE_TEXT.condition} />
+      {problems.map((p) => (
+        <Txt key={p} tone="urgent" accessibilityLiveRegion="assertive">
+          {t(`cards.problem.${p}`)}
+        </Txt>
+      ))}
       <Txt variant="small" tone="secondary">
         {t('share.newPrivacy')}
       </Txt>

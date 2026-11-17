@@ -15,6 +15,7 @@ import {
   isDelivered,
   isExpired,
   isOpen,
+  makerMaySeePhoto,
   mustDeletePhoto,
   noteProblems,
   queueOrder,
@@ -42,7 +43,7 @@ import {
   type StickerCounts,
   type StickerId,
 } from '../petcards';
-import { canSeePhoto } from '../petcards';
+import { canChangePhoto, canSeePhoto } from '../petcards';
 import type { Critter, Pet } from './game-types';
 import type { CardInput, PetCardsRepository, Portrait, RegularInput } from './petcard-repository';
 import type { DemoRole } from './types';
@@ -102,6 +103,25 @@ export class PetCardStore implements PetCardsRepository {
   private isMaker = () => this.ctx.role() === 'board';
   /** A signed-out person is never treated as a pet's family, even on the family's phone. */
   private isFamily = (petId: string) => this.signedIn() && !!this.ctx.findPet(petId)?.mine;
+
+  /**
+   * What "Show my information" includes from pet cards: only this person's own
+   * things. Other people's ids (who wrote a note, who was quietly stopped) and the
+   * portrait maker's spending log are left out (block 5 review).
+   */
+  exportView() {
+    const s = this.read();
+    const own = (petId: string) => !!this.ctx.findPet(petId)?.mine;
+    return {
+      cards: Object.fromEntries(Object.entries(s.cards).filter(([petId]) => own(petId))),
+      stickersIGave: s.stickers,
+      notesIWrote: s.notes.filter((n) => n.authorId === ME).map(({ authorId: _a, ...n }) => n),
+      noteDecisions: s.noteDecisions,
+      sendersIStopped: s.blocks.length,
+      regularsISuggested: s.regulars.filter((r) => r.mine),
+      portraitRequests: (s.requests ?? []).filter((r) => r.mine),
+    };
+  }
 
   /** Called when a person deletes their information. */
   clearMemory() {
@@ -239,6 +259,7 @@ export class PetCardStore implements PetCardsRepository {
   }
   setPhoto(petId: string, uri: string | undefined) {
     if (!this.isFamily(petId)) return;
+    if (!canChangePhoto(this.requests.find((r) => r.petId === petId && r.mine && isOpen(r)))) return;
     if (uri) this.photos.set(petId, uri);
     else this.photos.delete(petId);
     this.notify();
@@ -277,7 +298,7 @@ export class PetCardStore implements PetCardsRepository {
   /** The portrait maker sees a photo only while its request is open. */
   getRequestPhoto(requestId: string): string | undefined {
     const r = this.requests.find((x) => x.id === requestId);
-    if (!r || !this.isMaker() || !isOpen(r)) return undefined;
+    if (!r || !this.isMaker() || !makerMaySeePhoto(r)) return undefined;
     return this.photos.get(r.petId);
   }
   requestProblems(petId: string, agreed: boolean): RequestProblem[] {
@@ -291,7 +312,7 @@ export class PetCardStore implements PetCardsRepository {
     const made = this.requests.some((r) => r.petId === pet.id && r.mine && r.status === 'made');
     this.requests = [
       ...this.requests,
-      { id: 'req-' + Date.now().toString(36), petId: pet.id, petName: pet.name, kind: pet.kind, requestedAt: now, status: 'waiting', tries: 0, consent: { at: now, version: CONSENT_VERSION, service: 'sample' }, redo: made, mine: true, sample: false },
+      { id: 'req-' + Date.now().toString(36), petId: pet.id, kind: pet.kind, requestedAt: now, status: 'waiting', tries: 0, consent: { at: now, version: CONSENT_VERSION, service: 'sample' }, redo: made, mine: true, sample: false },
     ];
     this.notify();
     return [];
@@ -324,11 +345,13 @@ export class PetCardStore implements PetCardsRepository {
     const request = this.requests.find((r) => r.id === id);
     const ok = this.step(id, (r) => advance(r, { type: 'finish', by: 'maker', tries, triesLeft: triesLeft(s.spend, new Date()) }));
     if (!ok || !request) return false;
+    // Log the tries the rules counted (rounded and limited), not the raw number passed in (block 5 review, S-24).
+    const counted = this.requests.find((r) => r.id === id)?.tries ?? tries;
     if (uri) this.portraits.set(request.petId, uri);
     const after = this.read();
     await this.write({
       ...after,
-      spend: [...after.spend, { at: new Date().toISOString(), tries }],
+      spend: [...after.spend, { at: new Date().toISOString(), tries: counted }],
       samplePortraits: uri ? after.samplePortraits.filter((p) => p !== request.petId) : [...after.samplePortraits.filter((p) => p !== request.petId), request.petId],
     });
     return true;
