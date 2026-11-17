@@ -13,6 +13,7 @@ import { useLoad } from '@/lib/data/provider';
 import { POINTS } from '@/lib/game';
 import { useT } from '@/lib/i18n';
 import { useSession } from '@/lib/session';
+import { stripPhoto } from '@/lib/strip-photo';
 import { radius, space } from '@/lib/theme';
 
 const ZONES: Zone[] = ['yard', 'garden', 'street', 'park', 'creek', 'sky'];
@@ -43,10 +44,10 @@ export default function CritterScreen() {
         const permission = await ImagePicker.requestCameraPermissionsAsync();
         if (!permission.granted) return setPhotoProblem(true);
       }
-      // exif: false leaves out the location and device details a camera hides inside a photo.
-      const options: ImagePicker.ImagePickerOptions = { mediaTypes: ['images'], quality: 0.5, exif: false };
+      const options: ImagePicker.ImagePickerOptions = { mediaTypes: ['images'], quality: 0.8, exif: false };
       const picked = fromCamera ? await ImagePicker.launchCameraAsync(options) : await ImagePicker.launchImageLibraryAsync(options);
-      if (!picked.canceled && picked.assets[0]) setPhoto(picked.assets[0].uri);
+      // exif: false does not clean the file. Drawing it again removes hidden details like where it was taken (block 4 finding).
+      if (!picked.canceled && picked.assets[0]) setPhoto(await stripPhoto(picked.assets[0].uri));
     } catch {
       setPhotoProblem(true);
     }

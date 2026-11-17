@@ -63,9 +63,9 @@ with sync_playwright() as p:
     check("pet page shows how to say hello", has("How to say hello"))
     page.get_by_role("button", name="I met Biscuit!").click(); wait()
     check("meeting a pet is recorded", has("You met Biscuit!"))
-    page.get_by_label("Share a story about Biscuit").fill("Biscuit carried my newspaper to the door.")
-    page.get_by_role("button", name="Send to Biscuit").click(); wait(800)
-    check("sending a pet story needs sign-in", has("Join as a neighbor"))
+    page.get_by_label("Write a paw note for Biscuit").fill("Biscuit carried my newspaper to the door.")
+    page.get_by_role("button", name="Send the paw note").click(); wait(800)
+    check("sending a paw note needs sign-in", has("Join as a neighbor"))
     # Detective case, played the old-school way: witnesses, travel, notebook, name the culprit.
     page.goto(BASE + "/critters/case/case-porch"); wait(800)
     check("a case opens with a case file and a deadline", has("CASE FILE") and has("You have 24 hours"))

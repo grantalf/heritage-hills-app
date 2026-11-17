@@ -6,12 +6,14 @@
 import type { StringKey } from './en';
 import { rescueEs } from './rescue.es';
 import { questEs } from './quest.es';
+import { cardsEs } from './cards.es';
 import { workshopEs } from './workshop.es';
 
 export const es: Record<StringKey, string> = {
   ...workshopEs,
   ...rescueEs,
   ...questEs,
+  ...cardsEs,
   'draft.banner': 'Primer borrador · Datos de ejemplo · No se envía nada',
 
   'common.back': 'Atrás',
