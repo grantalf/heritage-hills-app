@@ -13,6 +13,7 @@ import type { ArtSpec } from '@/components/critter-art';
 
 import { addObservation, emptyObservations, sampleObservations } from '../patterns';
 import type { GameState, Pet, PetKind, Zone } from './game-types';
+import { emptyPetCards, PetCardStore, type PetCardState } from './petcard-sample';
 import type { AlertDraft, FlowersState, PendingAlert, Repository, RsvpAnswer } from './repository';
 import type {
   Alert,
@@ -45,6 +46,7 @@ type State = {
   game: GameState;
   myPets: Pet[];
   pendingStories: Record<string, number>;
+  petCards: PetCardState;
 };
 
 const emptyState = (): State => ({
@@ -62,6 +64,7 @@ const emptyState = (): State => ({
   game: emptyGame(),
   myPets: [],
   pendingStories: {},
+  petCards: emptyPetCards(),
 });
 
 /** Simulates other neighbors' reports so the "two reports hide an item" rule can be seen. */
@@ -75,6 +78,14 @@ export class SampleRepository implements Repository {
   private readonly startedAt = new Date();
   /** Photos are kept in memory only: never saved, never sent. */
   private photos = new Map<string, string>();
+  readonly cards = new PetCardStore({
+    read: () => this.state.petCards,
+    write: (petCards) => this.commit({ ...this.state, petCards }),
+    notify: () => this.listeners.forEach((l) => l()),
+    role: () => this.state.role,
+    findPet: (id) => [...this.state.myPets, ...game.samplePets].find((p) => p.id === id),
+    findCritter: (id) => game.critters.find((c) => c.id === id),
+  });
 
   constructor() {
     let chain: RecordEntry<DecisionContent>[] = [];
@@ -97,7 +108,7 @@ export class SampleRepository implements Repository {
         .then((raw) => {
           if (raw) {
             const saved = JSON.parse(raw) as Partial<State>;
-            this.state = { ...emptyState(), ...saved, game: { ...emptyGame(), ...saved.game } };
+            this.state = { ...emptyState(), ...saved, game: { ...emptyGame(), ...saved.game }, petCards: { ...emptyPetCards(), ...saved.petCards } };
           }
         })
         .catch(() => {
@@ -238,6 +249,9 @@ export class SampleRepository implements Repository {
       reports: [...this.state.reports, { itemId, reporterId: ME }, { itemId, reporterId: OTHER_REPORTER }],
     });
   }
+  isHidden(itemId: string) {
+    return isHiddenByReports(itemId, this.state.reports);
+  }
   hasReported(itemId: string) {
     return this.state.reports.some((r) => r.itemId === itemId && r.reporterId === ME);
   }
@@ -315,6 +329,7 @@ export class SampleRepository implements Repository {
   }
   deleteMyData() {
     this.photos.clear();
+    this.cards.clearMemory();
     return this.commit({ ...emptyState(), postedAlerts: this.state.postedAlerts });
   }
 
@@ -342,13 +357,21 @@ export class SampleRepository implements Repository {
     for (const s of this.state.game.sightings) counts[s.critterId] = (counts[s.critterId] ?? 0) + 1;
     return { counts, goal: game.SAMPLE_TALLY_GOAL };
   }
+  /**
+   * Cards families make are for verified neighbors only; signed-out visitors see
+   * the sample pets. A card two neighbors reported is hidden, except from its family.
+   */
+  private visiblePets(): Pet[] {
+    const signedIn = this.state.role !== 'visitor';
+    return [...(signedIn ? this.state.myPets : []), ...game.samplePets].filter((p) => (p.mine && signedIn) || !isHiddenByReports(p.id, this.state.reports));
+  }
   async listPets() {
-    return [...this.state.myPets, ...game.samplePets];
+    return this.visiblePets();
   }
   async getPet(id: string) {
-    return [...this.state.myPets, ...game.samplePets].find((p) => p.id === id);
+    return this.visiblePets().find((p) => p.id === id);
   }
-  addPet(input: { name: string; kind: PetKind; about: string; hello: string; art?: ArtSpec }) {
+  async addPet(input: { name: string; kind: PetKind; about: string; hello: string; art?: ArtSpec }) {
     const same = { en: '', es: '' };
     const pet: Pet = {
       id: 'mypet-' + Date.now().toString(36),
@@ -365,10 +388,11 @@ export class SampleRepository implements Repository {
       mine: true,
       sample: false,
     };
-    return this.commit({ ...this.state, myPets: [pet, ...this.state.myPets] });
+    await this.commit({ ...this.state, myPets: [pet, ...this.state.myPets] });
+    return pet.id;
   }
   removePet(id: string) {
-    return this.commit({ ...this.state, myPets: this.state.myPets.filter((p) => p.id !== id) });
+    return this.commit({ ...this.state, myPets: this.state.myPets.filter((p) => p.id !== id), petCards: this.cards.forgetPet(id) });
   }
   meetPet(id: string) {
     if (this.state.game.petsMet.includes(id)) return Promise.resolve();

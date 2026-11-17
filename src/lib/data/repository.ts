@@ -11,6 +11,7 @@ import type { ArtSpec } from '@/components/critter-art';
 import type { DetectiveCase } from '../cases';
 import type { Observations } from '../patterns';
 import type { BingoCard, Critter, GameState, Pet, PetKind, Zone } from './game-types';
+import type { PetCardsRepository } from './petcard-repository';
 import type {
   Alert,
   AlertKind,
@@ -82,6 +83,8 @@ export interface Repository {
   cancelShareRequest(itemId: string): Promise<void>;
   reportItem(itemId: string): Promise<void>;
   hasReported(itemId: string): boolean;
+  /** True once two different neighbors reported it. It stays hidden until a moderator reviews it. */
+  isHidden(itemId: string): boolean;
 
   getRsvp(eventId: string): RsvpAnswer | undefined;
   setRsvp(eventId: string, answer: RsvpAnswer | undefined): Promise<void>;
@@ -122,7 +125,8 @@ export interface Repository {
   listPets(): Promise<Pet[]>;
   getPet(id: string): Promise<Pet | undefined>;
   /** Only a pet's own family adds a pet. */
-  addPet(input: { name: string; kind: PetKind; about: string; hello: string; art?: ArtSpec }): Promise<void>;
+  /** Answers the new pet's id. */
+  addPet(input: { name: string; kind: PetKind; about: string; hello: string; art?: ArtSpec }): Promise<string>;
   removePet(id: string): Promise<void>;
   meetPet(id: string): Promise<void>;
   /** A story goes to the pet's family to approve. It is not shown until they do. */
@@ -135,6 +139,9 @@ export interface Repository {
   getObservations(): Promise<Observations>;
   listBingoCards(): Promise<BingoCard[]>;
   toggleBingo(cardId: string, squareId: string): Promise<void>;
+
+  /** Pet character cards, stickers, paw notes and portrait requests (docs/PETCARDS.md). */
+  readonly cards: PetCardsRepository;
 
   // Board tools (two-approver rule).
   getPendingAlert(): PendingAlert | undefined;

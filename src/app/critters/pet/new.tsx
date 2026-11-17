@@ -36,8 +36,8 @@ export default function NewPetScreen() {
           label={t('critters.savePet')}
           disabled={!ready}
           onPress={() => {
-            void repo.addPet({ name: name.trim(), kind, about: about.trim(), hello: hello.trim() || t('critters.helloDefault'), art });
-            router.back();
+            // Next, the family fills in the character card.
+            void repo.addPet({ name: name.trim(), kind, about: about.trim(), hello: hello.trim() || t('critters.helloDefault'), art }).then((petId) => router.replace({ pathname: '/critters/pet/edit', params: { id: petId, fresh: '1' } }));
           }}
         />
       }>
