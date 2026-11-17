@@ -4,8 +4,10 @@
  * review it before launch.
  */
 import type { StringKey } from './en';
+import { workshopEs } from './workshop.es';
 
 export const es: Record<StringKey, string> = {
+  ...workshopEs,
   'draft.banner': 'Primer borrador · Datos de ejemplo · No se envía nada',
 
   'common.back': 'Atrás',

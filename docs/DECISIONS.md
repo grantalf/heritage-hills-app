@@ -32,6 +32,26 @@ Format: ID | date | decision | why | alternatives | status. "Proposed" means the
 - D-022 | 2026-11-15 | The app's visual style is developed as a proposed official neighborhood style | Founder direction | App-only style | proposed
 - D-020 | 2026-11-15 | No AI image or video generator needed. Type, color, layout, icons, vector illustration, real photos with permission | Trust; cost | AI imagery | proposed
 
+## Games, art and the paper map (Fable plan, logged at the start of block 1)
+- D-056 | 2026-11-16 | Second mini-game: arcade brawler with cartoon fantasy violence. Fantasy enemies that poof, no blood, no human or real-animal enemies | Founder direction; nostalgia for parents | Non-violent clean-up theme | accepted by founder; board view open
+- D-057 | 2026-11-16 | Own small engine in TypeScript, rules kept apart from drawing | Durable, testable, no dependency | Game library | accepted (built in block 1)
+- D-058 | 2026-11-16 | Art drawn in code first, exported as standard sprite sheets so it can be replaced | $0, no licenses, upgradable | AI sprite tools first | accepted by founder
+- D-059 | 2026-11-16 | Pet portraits by request to a portrait maker, who uses an outside image service and uploads the result. The app does not call an AI service. Budget cap about $50 a year. Replaces part of D-051 and D-020 | Cost control, human check, quality | Automatic generation per user | founder in favor; needs board approval
+- D-060 | 2026-11-16 | Style samples given to an image service are the association's own art | Avoids copying a studio's or artist's style | Reference screenshots as samples | proposed
+- D-061 | 2026-11-16 | The brawler is built to ship in the app, web only, or as a companion app; choose at store time | Store age rating covers the whole app | In-app only | proposed
+- D-062 | 2026-11-16 | Final boss is our own cartoon Triceratops built as a metal sculpture, inspired by the neighborhood one; ask the artist or owner | Founder direction; local identity | Generic boss | accepted by founder; permission open
+- D-063 | 2026-11-16 | Skin packs with date ranges for enemies and bosses; structure now, holiday packs later | Cheap now, costly to add later | Hard-coded art | accepted by founder (built in block 1)
+- D-064 | 2026-11-16 | Pet character cards with real photo, portrait and stats. Families make pet cards; moderators approve suggested wild regulars | Founder direction; keeps D-048 | Anyone adds any animal | proposed
+- D-065 | 2026-11-16 | Stickers plus family-approved paw notes. A narrow exception to D-024 | Fun without open comments to moderate | Open reviews; star ratings | proposed
+- D-066 | 2026-11-16 | Critter Club gets its own retro role-playing look and game shell, original designs, accessibility kept | Founder: it feels like a reference app | Keep app styling | accepted by founder
+- D-067 | 2026-11-16 | Storybook neighborhood map with real roads and public places plus made-up features; it is Critter Club's world map. Sightings appear by public place or by one of four or five large optional regions, wildlife only, 10-sighting minimum, no pins. Settles the open part of D-053 | Founder direction; a map with roads is fine, a map of which yards report is not | Pin map; no map | accepted by founder for the map; regions need board approval. Map source changed by D-071
+- D-068 | 2026-11-16 | Art direction per the style brief | Founder direction | One look for everything | accepted by founder. Changed by D-069: two looks, not three
+- D-069 | 2026-11-16 | One pixel art direction for levels, menus and characters; the paper map is the only other look. Changes D-068 | Consistency, less work | Separate arcade look | accepted by founder
+- D-070 | 2026-11-16 | Critter Club's world is the paper map with points of interest. Tap to travel along roads. Gentle places open Critter Club activities; spooky places open side-scrolling rescue levels. Walk-around scenes are a later phase. No phone location | Founder direction; much smaller build; easier for least technical players; keeps D-061 | Walk-around scenes now; two unrelated games | accepted by founder
+- D-071 | 2026-11-16 | The paper map is drawn from the founder's hand sketch, not map data, and marked not to scale. Changes D-067 | No map-data credit, no download, storybook feel | Simplified public map data | accepted by founder
+- D-072 | 2026-11-16 | Every level ends with rescuing caged critters, shown unharmed, who thank the player. A rescue gives a stamp and a fact, not a field guide sighting | Founder direction; reinforces kindness to animals (D-050) | Levels end only with a boss defeat | accepted by founder
+- D-073 | 2026-11-16 | No fights at the school, homes or the garden. Border-region names joke about the highway and traffic, not about where other people live | Respect for neighbors; avoids violence at a school setting | Any place can be a level | proposed
+
 ## Governance
 - D-004 | 2026-11-15 | No DAO or token voting. Tamper-evident (hash-chained) decision log, roles tied to offices, two-approver rule | Bylaws and board stay the legal decision-makers; wallets exclude residents | Smart-contract governance | proposed
 - D-005 | 2026-11-15 | Polls are non-binding until the bylaws are reviewed | Vote validity depends on bylaws | Binding e-votes now | proposed

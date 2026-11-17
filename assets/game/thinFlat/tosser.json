@@ -1,0 +1,120 @@
+{
+ "frames": {
+  "idle_0": {
+   "frame": {
+    "x": 0,
+    "y": 0,
+    "w": 132,
+    "h": 132
+   }
+  },
+  "idle_1": {
+   "frame": {
+    "x": 132,
+    "y": 0,
+    "w": 132,
+    "h": 132
+   }
+  },
+  "walk_0": {
+   "frame": {
+    "x": 264,
+    "y": 0,
+    "w": 132,
+    "h": 132
+   }
+  },
+  "walk_1": {
+   "frame": {
+    "x": 396,
+    "y": 0,
+    "w": 132,
+    "h": 132
+   }
+  },
+  "walk_2": {
+   "frame": {
+    "x": 528,
+    "y": 0,
+    "w": 132,
+    "h": 132
+   }
+  },
+  "walk_3": {
+   "frame": {
+    "x": 660,
+    "y": 0,
+    "w": 132,
+    "h": 132
+   }
+  },
+  "wind_0": {
+   "frame": {
+    "x": 792,
+    "y": 0,
+    "w": 132,
+    "h": 132
+   }
+  },
+  "attack_0": {
+   "frame": {
+    "x": 924,
+    "y": 0,
+    "w": 132,
+    "h": 132
+   }
+  },
+  "hurt_0": {
+   "frame": {
+    "x": 0,
+    "y": 132,
+    "w": 132,
+    "h": 132
+   }
+  }
+ },
+ "meta": {
+  "image": "tosser.png",
+  "scale": 3,
+  "cell": {
+   "w": 44,
+   "h": 44
+  },
+  "anchor": {
+   "x": 20,
+   "y": 38
+  },
+  "animations": {
+   "idle": {
+    "from": 0,
+    "count": 2,
+    "fps": 3,
+    "loop": true
+   },
+   "walk": {
+    "from": 2,
+    "count": 4,
+    "fps": 6,
+    "loop": true
+   },
+   "wind": {
+    "from": 6,
+    "count": 1,
+    "fps": 1,
+    "loop": false
+   },
+   "attack": {
+    "from": 7,
+    "count": 1,
+    "fps": 1,
+    "loop": false
+   },
+   "hurt": {
+    "from": 8,
+    "count": 1,
+    "fps": 1,
+    "loop": false
+   }
+  }
+ }
+}

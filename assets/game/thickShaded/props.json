@@ -1,0 +1,96 @@
+{
+ "frames": {
+  "cage_0": {
+   "frame": {
+    "x": 0,
+    "y": 0,
+    "w": 180,
+    "h": 108
+   }
+  },
+  "cageOpen_0": {
+   "frame": {
+    "x": 180,
+    "y": 0,
+    "w": 180,
+    "h": 108
+   }
+  },
+  "pedestal_0": {
+   "frame": {
+    "x": 360,
+    "y": 0,
+    "w": 180,
+    "h": 108
+   }
+  },
+  "snack_0": {
+   "frame": {
+    "x": 540,
+    "y": 0,
+    "w": 180,
+    "h": 108
+   }
+  },
+  "shot_0": {
+   "frame": {
+    "x": 720,
+    "y": 0,
+    "w": 180,
+    "h": 108
+   }
+  },
+  "shot_1": {
+   "frame": {
+    "x": 900,
+    "y": 0,
+    "w": 180,
+    "h": 108
+   }
+  }
+ },
+ "meta": {
+  "image": "props.png",
+  "scale": 3,
+  "cell": {
+   "w": 60,
+   "h": 36
+  },
+  "anchor": {
+   "x": 30,
+   "y": 32
+  },
+  "animations": {
+   "cage": {
+    "from": 0,
+    "count": 1,
+    "fps": 1,
+    "loop": false
+   },
+   "cageOpen": {
+    "from": 1,
+    "count": 1,
+    "fps": 1,
+    "loop": false
+   },
+   "pedestal": {
+    "from": 2,
+    "count": 1,
+    "fps": 1,
+    "loop": false
+   },
+   "snack": {
+    "from": 3,
+    "count": 1,
+    "fps": 1,
+    "loop": false
+   },
+   "shot": {
+    "from": 4,
+    "count": 2,
+    "fps": 8,
+    "loop": true
+   }
+  }
+ }
+}
